@@ -1,0 +1,30 @@
+<h2>Admin Panel - Pending Requests</h2>
+
+@if (requests.length === 0) {
+<p>No pending requests.</p>
+} @else {
+<div class="list">
+    @for (item of requests; track item.id) {
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+        <h3>{{ item.name }} <small style="color: gray; font-size: 0.8em;">({{ item.category }})</small></h3>
+        <p><strong>Description:</strong> {{ item.description }}</p>
+        <p><strong>Address:</strong> {{ item.address }}</p>
+
+        <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="text" placeholder="Admin Comments" #comments style="padding: 5px;">
+
+            <input type="number" placeholder="Lat" #lat style="width: 80px; padding: 5px;">
+            <input type="number" placeholder="Lng" #lng style="width: 80px; padding: 5px;">
+
+            <button (click)="update(item.id, 'APPROVED', comments.value, lat.valueAsNumber, lng.valueAsNumber)" style="background-color: #4CAF50; color: white; border: none; padding: 6px 12px; cursor: pointer;">
+              Approve
+            </button>
+
+            <button (click)="update(item.id, 'REJECTED', comments.value, null, null)" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; cursor: pointer;">
+              Reject
+            </button>
+        </div>
+    </div>
+    }
+</div>
+}

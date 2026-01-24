@@ -1,0 +1,16 @@
+<h2>Register</h2>
+<form (submit)="register()">
+    <input type="text" placeholder="Username" [(ngModel)]="user.username" name="username" required>
+
+    <input type="password" placeholder="Password" [(ngModel)]="user.password" name="password" required>
+
+    <select [(ngModel)]="user.role" name="role">
+    <option value="CITIZEN">Citizen</option>
+    <option value="OWNER">Business Owner</option>
+    <option value="ADMIN">Admin</option>
+  </select>
+
+    <button type="submit">Register</button>
+</form>
+
+<p><a routerLink="/login">Already have an account? Login here</a></p>

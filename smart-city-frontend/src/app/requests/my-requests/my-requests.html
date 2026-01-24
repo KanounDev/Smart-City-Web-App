@@ -1,0 +1,59 @@
+<h2>My Requests</h2>
+
+@if (requests.length === 0) {
+<p>No requests found.</p>
+} @else {
+<div class="requests-list">
+    @for (item of requests; track item.id) {
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+
+        @if (editingId !== item.id) {
+        <h3>{{ item.name }}</h3>
+        <p><strong>Category:</strong> {{ item.category }}</p>
+        <p><strong>Description:</strong> {{ item.description }}</p>
+        <p><strong>Address:</strong> {{ item.address }}</p>
+        <p><strong>Status:</strong>
+            <span [style.color]="item.status === 'APPROVED' ? 'green' : (item.status === 'REJECTED' ? 'red' : 'orange')">
+              {{ item.status }}
+            </span>
+        </p>
+        <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
+
+        <div style="margin-top: 10px;">
+            <button (click)="startEdit(item)">Edit</button>
+            <button (click)="delete(item.id)" style="background-color: #ff4444; color: white; margin-left: 10px; border: none; padding: 5px 10px; cursor: pointer;">
+              Delete
+            </button>
+        </div>
+        } @else {
+        <div style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+            <div style="margin-bottom: 10px;">
+                <label style="display:block">Name:</label>
+                <input [(ngModel)]="editForm.name" style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display:block">Description:</label>
+                <input [(ngModel)]="editForm.description" style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display:block">Address:</label>
+                <input [(ngModel)]="editForm.address" style="width: 100%;">
+            </div>
+
+            <div style="margin-top: 10px;">
+                <button (click)="saveEdit()" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">
+                Save
+              </button>
+                <button (click)="cancelEdit()" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">
+                Cancel
+              </button>
+            </div>
+        </div>
+        }
+
+    </div>
+    }
+</div>
+}
