@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
   selector: 'app-submit-request',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './submit-request.html'
+  templateUrl: './submit-request.html',
+  styleUrls: ['./submit-request.css']
 })
 export class SubmitRequestComponent {
   request = { name: '', description: '', category: 'Shop', address: '' };

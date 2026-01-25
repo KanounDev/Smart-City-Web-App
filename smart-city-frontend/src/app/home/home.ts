@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
-import { latLng, tileLayer, marker, Layer } from 'leaflet';
+import { latLng, tileLayer, marker, Layer, Map as LeafletMap, Icon, icon } from 'leaflet'; // Added Icon and icon
 import { RequestService } from '../requests/request.service';
 import { Subscription } from 'rxjs';
 
@@ -9,19 +9,45 @@ import { Subscription } from 'rxjs';
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule, LeafletModule],
-  templateUrl: './home.html'
+  templateUrl: './home.html',
+  styleUrls: ['./home.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private requestService = inject(RequestService);
-  private cdr = inject(ChangeDetectorRef); // Required for real-time UI updates
+  private cdr = inject(ChangeDetectorRef);
 
-  // Data State
   approved: any[] = [];
   layers: Layer[] = [];
-  
   private updateSub!: Subscription;
+  private map!: LeafletMap;
 
-  // Map Config
+  // 1. Fix the icons globally
+  private fixLeafletIcons() {
+    const defaultIcon = icon({
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      tooltipAnchor: [16, -28],
+      shadowSize: [41, 41]
+    });
+    
+    // Set this as the default for all markers
+    Marker.prototype.options.icon = defaultIcon;
+  }
+
+  // Define a special icon for the User/Visitor
+  private visitorIcon = icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
   options = {
     layers: [
       tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -30,21 +56,20 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
     ],
     zoom: 12,
-    center: latLng(36.8065, 10.1815)  // Tunis
+    center: latLng(36.8065, 10.1815)
   };
 
   ngOnInit() {
-    // 1. Load initial data
+    this.fixLeafletIcons(); // Run the fix on init
+    
     this.requestService.getApproved().subscribe({
       next: (data) => {
         this.approved = data || [];
-        this.updateMap(); // Create initial markers
+        this.updateMap();
         this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Error loading home data', err)
+      }
     });
 
-    // 2. Listen for Real-Time Updates
     if (this.requestService.getUpdates) {
       this.updateSub = this.requestService.getUpdates().subscribe((item: any) => {
         this.handleRealTimeUpdate(item);
@@ -53,40 +78,52 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    if (this.updateSub) this.updateSub.unsubscribe();
+  onMapReady(map: LeafletMap) {
+    this.map = map;
+    this.getCurrentLocation();
   }
 
-  handleRealTimeUpdate(item: any) {
-    // Check if the item is already in our list
-    const index = this.approved.findIndex(r => r.id === item.id);
+  getCurrentLocation() {
+    if (!navigator.geolocation) return;
 
-    // Scenario A: The request is APPROVED
-    if (item.status === 'APPROVED') {
-      if (index > -1) {
-        this.approved[index] = item; // Update existing
-      } else {
-        this.approved.push(item); // Add new
-      }
-    } 
-    // Scenario B: The request is NOT APPROVED (Rejected, Pending, or Deleted)
-    else {
-      if (index > -1) {
-        this.approved.splice(index, 1); // Remove it from the home page
-      }
-    }
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      
+      // Use the custom red visitorIcon here
+      marker([latitude, longitude], { icon: this.visitorIcon })
+        .addTo(this.map)
+        .bindPopup('<b>You are here</b>')
+        .openPopup();
 
-    // Refresh the map markers
-    this.updateMap();
+      this.map.setView([latitude, longitude], 14);
+    });
   }
 
   updateMap() {
     this.layers = this.approved
-      .filter(r => r.lat && r.lng) // Only map items with coordinates
+      .filter(r => r.lat && r.lng)
       .map(r => {
         return marker([r.lat, r.lng]).bindPopup(
           `<b>${r.name}</b><br>${r.category}<br>${r.description}`
         );
       });
   }
+
+  ngOnDestroy() {
+    if (this.updateSub) this.updateSub.unsubscribe();
+  }
+
+  handleRealTimeUpdate(item: any) {
+    const index = this.approved.findIndex(r => r.id === item.id);
+    if (item.status === 'APPROVED') {
+      if (index > -1) this.approved[index] = item;
+      else this.approved.push(item);
+    } else if (index > -1) {
+      this.approved.splice(index, 1);
+    }
+    this.updateMap();
+  }
 }
+
+// Small helper to ensure the Marker import is handled
+import { Marker } from 'leaflet';

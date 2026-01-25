@@ -8,7 +8,8 @@ import { Subscription } from 'rxjs';
   selector: 'app-my-requests',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './my-requests.html'
+  templateUrl: './my-requests.html',
+  styleUrls: ['./my-requests.css']
 })
 export class MyRequestsComponent implements OnInit, OnDestroy {
   private requestService = inject(RequestService);

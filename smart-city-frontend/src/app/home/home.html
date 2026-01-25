@@ -1,6 +1,7 @@
 <h1>Approved Shops and Services</h1>
 
-<div style="height: 400px; margin-bottom: 20px;" leaflet [leafletOptions]="options" [leafletLayers]="layers"></div>
+<div style="height: 400px; margin-bottom: 20px;" leaflet [leafletOptions]="options" [leafletLayers]="layers" (leafletMapReady)="onMapReady($event)">
+</div>
 
 @if (approved.length === 0) {
 <p>No approved services yet.</p>

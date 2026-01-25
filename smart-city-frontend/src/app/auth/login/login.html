@@ -1,10 +1,9 @@
-<h2>Login</h2>
-<form (submit)="login()">
-    <input type="text" placeholder="Username" [(ngModel)]="user.username" name="username" required>
-
-    <input type="password" placeholder="Password" [(ngModel)]="user.password" name="password" required>
-
-    <button type="submit">Login</button>
-</form>
-
-<p><a routerLink="/register">Don't have an account? Register here</a></p>
+<div class="login-container">
+    <h2>Login</h2>
+    <form (submit)="login()">
+        <input type="text" placeholder="Username" [(ngModel)]="user.username" name="username" required>
+        <input type="password" placeholder="Password" [(ngModel)]="user.password" name="password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p><a routerLink="/register">Don't have an account? Register here</a></p>
+</div>

@@ -1,0 +1,199 @@
+:root {
+    --primary-blue: #0066cc;
+    /* slightly deeper modern blue */
+    --accent-cyan: #00c4ff;
+    --success-green: #00d084;
+    --warning-orange: #ffaa00;
+    --danger-red: #ff2d55;
+    --neon-glow: rgba(0, 196, 255, 0.6);
+    --bg-gradient: linear-gradient(135deg, #e6f0fa 0%, #b3e5fc 50%, #4fc3f7 100%);
+    --text-dark: #0f172a;
+    --text-light: #ffffff;
+    --card-shadow: 0 4px 20px rgba(0, 119, 255, 0.12);
+    --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    --nav-bg: rgba(6, 70, 140, 0.92);
+    /* deeper blue, more opaque */
+    --nav-backdrop: blur(12px);
+    --text-shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.4);
+    /* subtle shadow for readability */
+}
+
+@keyframes subtleGlow {
+    from {
+        box-shadow: 0 2px 12px rgba(0, 196, 255, 0.08);
+    }
+    to {
+        box-shadow: 0 6px 24px rgba(0, 196, 255, 0.18);
+    }
+}
+
+body {
+    background: var(--bg-gradient);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    position: relative;
+    line-height: 1.6;
+}
+
+nav {
+    background: var(--nav-bg);
+    backdrop-filter: var(--nav-backdrop);
+    -webkit-backdrop-filter: var(--nav-backdrop);
+    padding: 1.1rem 2.8rem;
+    /* a bit taller */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2.2rem;
+    /* more space between items */
+}
+
+.nav-left a {
+    font-size: 1.32rem;
+    /* bigger Home */
+    font-weight: 700;
+    /* bold for branding */
+    letter-spacing: -0.01em;
+    text-shadow: var(--text-shadow-nav);
+}
+
+.nav-right {
+    gap: 1.25rem;
+}
+
+.nav-right a,
+.nav-right button {
+    font-size: 1.05rem;
+    /* noticeably larger than before */
+    font-weight: 500;
+    padding: 0.65rem 1.4rem;
+    border-radius: 10px;
+    transition: var(--transition);
+    text-shadow: var(--text-shadow-nav);
+    /* helps against background lines */
+    position: relative;
+}
+
+.nav-right button {
+    /* Logout */
+    font-weight: 600;
+    background: rgba(220, 38, 38, 0.95);
+    /* stronger red */
+    padding: 0.65rem 1.6rem;
+}
+
+nav a,
+nav button {
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: 12px;
+    transition: var(--transition);
+    position: relative;
+    background: transparent;
+}
+
+nav a:hover,
+nav button:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 4px 16px rgba(0, 196, 255, 0.35);
+    transform: translateY(-1.5px);
+}
+
+nav a.active,
+nav a[aria-current="page"] {
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 0 0 2px var(--accent-cyan);
+}
+
+
+/* Underline hover effect – modern & clean */
+
+nav a::after,
+nav button::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    /* thicker line */
+    bottom: 0.4rem;
+    left: 50%;
+    background: var(--accent-cyan);
+    border-radius: 3px;
+    transition: width 0.32s ease, left 0.32s ease;
+}
+
+nav a:hover::after,
+nav button:hover::after {
+    width: 70%;
+    left: 15%;
+}
+
+nav a.active,
+nav a[aria-current="page"] {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 0 2.5px var(--accent-cyan);
+}
+
+
+/* Logout button – more danger-oriented but still fits theme */
+
+nav button {
+    background: rgba(255, 45, 85, 0.9);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+nav button:hover {
+    background: rgba(255, 45, 85, 1);
+    box-shadow: 0 4px 16px rgba(255, 45, 85, 0.4);
+}
+
+main {
+    padding: 2.5rem 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    nav {
+        padding: 1rem 1.6rem;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+    .nav-left a {
+        font-size: 1.22rem;
+    }
+    .nav-right {
+        gap: 1.3rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+    .nav-right a,
+    .nav-right button {
+        font-size: 0.98rem;
+        padding: 0.55rem 1.15rem;
+    }
+}

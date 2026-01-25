@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
   selector: 'app-register',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './register.html'
+  templateUrl: './register.html',
+  styleUrls: ['./register.css']
 })
 export class RegisterComponent {
   user = { username: '', password: '', role: 'OWNER' };  // Default to OWNER

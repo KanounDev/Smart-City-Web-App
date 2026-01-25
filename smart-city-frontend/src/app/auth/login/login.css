@@ -1,0 +1,88 @@
+.login-container {
+    max-width: 420px;
+    margin: 80px auto;
+    padding: 40px 32px;
+    background-color: #ffffff;
+    /* Solid white for readability */
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    animation: var(--animation-glow);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 32px;
+    color: var(--primary-blue);
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f8f9fa;
+    /* Light gray for input fields */
+    transition: var(--transition);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 4px rgba(0, 209, 255, 0.2);
+}
+
+button[type="submit"] {
+    padding: 14px;
+    background: linear-gradient(to right, var(--primary-blue), var(--accent-cyan));
+    color: var(--text-light);
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+button[type="submit"]:hover {
+    background: linear-gradient(to right, var(--accent-cyan), var(--primary-blue));
+    box-shadow: 0 0 12px var(--neon-glow);
+    transform: translateY(-2px);
+}
+
+p {
+    text-align: center;
+    margin-top: 28px;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+}
+
+p a {
+    color: var(--accent-cyan);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+p a:hover {
+    text-decoration: underline;
+    color: var(--primary-blue);
+    text-shadow: 0 0 5px var(--neon-glow);
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        margin: 50px 20px;
+        padding: 32px 24px;
+    }
+}

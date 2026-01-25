@@ -8,7 +8,8 @@ import { Subscription } from 'rxjs';
   selector: 'app-admin-panel',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './admin-panel.html'
+  templateUrl: './admin-panel.html',
+  styleUrls: ['./admin-panel.css']
 })
 export class AdminPanelComponent implements OnInit, OnDestroy {
   private requestService = inject(RequestService);
