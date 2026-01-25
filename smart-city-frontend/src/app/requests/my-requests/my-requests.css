@@ -1,88 +1,257 @@
 h2 {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    /* Aligned with submit-request */
     color: var(--primary-blue);
     font-size: 2rem;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+    /* Added subtle shadow */
+}
+
+.no-requests {
+    text-align: center;
+    color: #6b7280;
+    font-size: 1.2rem;
+    margin: 2rem 0;
 }
 
 .requests-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* Reduced min-width for narrower cards */
+    gap: 20px;
+    /* Reduced gap for compactness */
+    max-width: 1000px;
+    /* Reduced overall max-width to center and constrain */
     margin: 0 auto;
 }
 
-.requests-list div {
+
+/* Simplified card styling: Removed gradient, lighter shadow */
+
+.request-card {
     background: #ffffff;
-    /* Solid */
-    padding: 25px;
-    border-radius: 16px;
+    /* Solid white, like form */
+    padding: 20px;
+    /* Slightly reduced padding */
+    border-radius: 12px;
+    /* Aligned with form */
     box-shadow: var(--card-shadow);
     transition: var(--transition);
+    border: 1px solid rgba(0, 123, 255, 0.1);
+    /* Subtle border */
 }
 
-.requests-list div:hover {
-    box-shadow: 0 8px 24px rgba(0, 209, 255, 0.25);
-    transform: translateY(-4px);
+.request-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    /* Softer shadow, no neon */
+    transform: translateY(-2px);
+    /* Subtle lift */
 }
 
-.requests-list h3 {
-    margin-bottom: 15px;
-    color: var(--text-dark);
-    font-size: 1.4rem;
-}
-
-.requests-list p {
+.request-card h3 {
     margin-bottom: 12px;
+    color: var(--text-dark);
+    font-size: 1.3rem;
+    /* Slightly smaller for balance */
+}
+
+.request-card p {
+    margin-bottom: 10px;
     font-size: 1rem;
+    color: #4b5563;
+    /* Softer text color */
 }
 
-.status-span {
-    font-weight: bold;
-    padding: 6px 12px;
-    border-radius: 30px;
+
+/* Status badge: Lighter backgrounds, less bold */
+
+.status-badge {
+    font-weight: 600;
+    /* Less bold */
+    padding: 5px 10px;
+    border-radius: 16px;
+    /* Softer pill */
+    font-size: 0.85rem;
 }
 
-.status-span[style*="green"] {
-    background: rgba(0, 230, 118, 0.15);
-    color: var(--success-green);
+.status-pending {
+    background: rgba(245, 158, 11, 0.2);
+    /* Lighter orange */
+    color: #d97706;
 }
 
-.status-span[style*="red"] {
-    background: rgba(255, 23, 68, 0.15);
-    color: var(--danger-red);
+.status-approved {
+    background: rgba(34, 197, 94, 0.2);
+    /* Lighter green */
+    color: #16a34a;
 }
 
-.status-span[style*="orange"] {
-    background: rgba(255, 171, 0, 0.15);
-    color: var(--warning-orange);
+.status-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    /* Lighter red */
+    color: #dc2626;
 }
 
-.edit-form {
-    background: #f8f9fa;
-    /* Light gray, solid-ish */
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 20px;
+
+/* Documents section: Subtle */
+
+.documents-section {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 123, 255, 0.1);
+    /* Lighter border */
 }
 
-.edit-form label {
+.documents-section h4 {
+    font-size: 1.1rem;
+    color: var(--primary-blue);
+    margin-bottom: 8px;
+}
+
+.file-list {
+    list-style: none;
+    padding: 0;
+}
+
+.file-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+    /* Very light */
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    transition: var(--transition);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Subtle border */
+}
+
+.file-list li:hover {
+    background: #f0f9ff;
+    /* Very subtle blue tint */
+}
+
+.file-list a {
+    color: var(--primary-blue);
+    /* Aligned with accents */
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.file-list a:hover {
+    text-decoration: underline;
+    color: var(--accent-cyan);
+}
+
+
+/* Add files section: Aligned with submit-request */
+
+.add-files {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px dashed rgba(0, 123, 255, 0.2);
+    /* Dashed like file-upload-section */
+    border-radius: 10px;
+    background: #f9fafb;
+    /* Light bg */
+}
+
+.add-files label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
+    color: var(--text-dark);
 }
+
+.custom-file-upload {
+    display: inline-block;
+    background: linear-gradient(to right, var(--primary-blue), var(--accent-cyan));
+    color: var(--text-light);
+    padding: 10px 20px;
+    /* Smaller */
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    margin-bottom: 8px;
+}
+
+.custom-file-upload:hover {
+    background: linear-gradient(to right, var(--accent-cyan), var(--primary-blue));
+    box-shadow: 0 0 8px rgba(0, 209, 255, 0.2);
+    /* Softer glow */
+    transform: translateY(-1px);
+    /* Less dramatic */
+}
+
+.upload-hint {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 6px 0 10px;
+}
+
+.upload-action-btn {
+    background: linear-gradient(to right, var(--primary-blue), var(--accent-cyan));
+    /* Aligned with submit button */
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    /* Full width for consistency */
+}
+
+.upload-action-btn:hover:not(:disabled) {
+    background: linear-gradient(to right, var(--accent-cyan), var(--primary-blue));
+    box-shadow: 0 0 8px rgba(0, 209, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.upload-action-btn:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+
+/* Remove button: Simplified */
+
+.remove-btn {
+    background: var(--danger-red);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.remove-btn:hover {
+    background: #ef4444;
+    /* Lighter red */
+}
+
+
+/* Action buttons: Aligned with submit form */
 
 .action-buttons {
     display: flex;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 .action-buttons button {
-    padding: 10px 20px;
+    flex: 1;
+    /* Equal width */
+    padding: 10px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     transition: var(--transition);
     font-weight: 600;
@@ -95,7 +264,7 @@ h2 {
 
 .action-buttons button.edit:hover {
     background: var(--accent-cyan);
-    box-shadow: 0 0 12px var(--neon-glow);
+    box-shadow: 0 0 8px rgba(0, 209, 255, 0.2);
 }
 
 .action-buttons button.delete {
@@ -104,25 +273,25 @@ h2 {
 }
 
 .action-buttons button.delete:hover {
-    background: darken(var(--danger-red), 15%);
-    box-shadow: 0 0 12px var(--danger-red);
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
 }
 
 .action-buttons button.save {
-    background: var(--success-green);
+    background: linear-gradient(to right, var(--primary-blue), var(--accent-cyan));
     color: var(--text-light);
 }
 
 .action-buttons button.save:hover {
-    background: darken(var(--success-green), 15%);
-    box-shadow: 0 0 12px var(--success-green);
+    background: linear-gradient(to right, var(--accent-cyan), var(--primary-blue));
+    box-shadow: 0 0 8px rgba(0, 209, 255, 0.2);
 }
 
 .action-buttons button.cancel {
-    background: #e2e8f0;
+    background: #e5e7eb;
     color: var(--text-dark);
 }
 
 .action-buttons button.cancel:hover {
-    background: #cbd5e1;
+    background: #d1d5db;
 }

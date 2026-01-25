@@ -14,14 +14,45 @@
     <div>
         <label>Category:</label>
         <select [(ngModel)]="request.category" name="category">
-      <option>Shop</option>
-      <option>Service</option>
-    </select>
+            <option>Shop</option>
+            <option>Service</option>
+        </select>
     </div>
 
     <div>
         <label>Address:</label>
         <input [(ngModel)]="request.address" name="address" placeholder="Address" required>
+    </div>
+
+    <!-- Updated: File upload section with custom styled button -->
+    <div class="file-upload-section">
+        <label>Supporting Documents (optional):</label>
+        <label class="custom-file-upload" for="file-input">  <!-- New: Custom label as button -->
+            Choose Files or Drag Here
+        </label>
+        <input id="file-input" type="file" multiple (change)="onFileChange($event)" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" hidden>
+        <!-- Hidden native input -->
+        <p class="upload-hint">Supported: PDF, images, Word docs. No file chosen yet.</p>
+        <!-- Updated hint text for clarity -->
+
+        @if (selectedFiles.length > 0) {
+        <div class="file-preview">
+            <h4>Selected Files:</h4>
+            <ul>
+                @for (file of selectedFiles; track $index) {
+                <li>
+                    <span class="file-name">
+        {{ file.name }} ({{ file.size | number }} bytes)
+    </span>
+
+                    <button type="button" (click)="removeFile($index)" class="remove-btn">
+        × Remove
+    </button>
+                </li>
+                }
+            </ul>
+        </div>
+        }
     </div>
 
     <button type="submit">Submit</button>

@@ -27,50 +27,59 @@ export class RequestService {
     return this.http.get<any[]>(`${this.apiUrl}/my`, { headers: this.getHeaders() });
   }
 
-  submitRequest(request: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, request, { headers: this.getHeaders() });
-  }
-
+  // New: For admin pending requests
   getPending(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/admin/pending`, { headers: this.getHeaders() });
   }
 
-  updateRequest(id: string, updated: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/admin/${id}`, updated, { headers: this.getHeaders() });
+  submitRequest(formData: FormData): Observable<any> {
+    return this.http.post<any>(this.apiUrl, formData, { headers: this.getHeaders() });
   }
 
-  // NEW: Update specific request (For Owner)
-  updateRequestOwner(id: string, request: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, request, { headers: this.getHeaders() });
+  addDocuments(id: string, formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/documents`, formData, { headers: this.getHeaders() });
   }
 
-  // NEW: Delete specific request (For Owner)
+  deleteDocument(id: string, index: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}/documents/${index}`, { headers: this.getHeaders() });
+  }
+
+  // New: For admin update
+  updateRequest(id: string, payload: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/admin/${id}`, payload, { headers: this.getHeaders() });
+  }
+
+  updateRequestOwner(id: string, payload: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, payload, { headers: this.getHeaders() });
+  }
+
   deleteRequest(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
-  // --- NEW: Expose WebSocket Updates ---
-  // This is the method your component was missing
+  // New: Public base URL getter (from earlier fix)
+  public getApiBaseUrl(): string {
+    return this.apiUrl;
+  }
+
   getUpdates(): Observable<any> {
     return this.requestUpdates.asObservable();
   }
 
-  // NEW: WebSocket Setup
   private initializeWebSocket() {
     const socket = new SockJS('http://localhost:8081/ws');
     this.stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
         console.log('Connected to WebSocket');
-        // Subscribe to public topic
         this.stompClient?.subscribe('/topic/requests', (message) => {
           if (message.body) {
             const updatedRequest = JSON.parse(message.body);
-            this.requestUpdates.next(updatedRequest); // Notify components
+            this.requestUpdates.next(updatedRequest);
           }
         });
       },
-      debug: (str) => console.log(str) // Optional: for debugging
+      debug: (str) => console.log(str)
     });
     this.stompClient.activate();
   }

@@ -1,18 +1,30 @@
-<h1>Approved Shops and Services</h1>
+<h1>Approved Shops & Services</h1>
 
-<div style="height: 400px; margin-bottom: 20px;" leaflet [leafletOptions]="options" [leafletLayers]="layers" (leafletMapReady)="onMapReady($event)">
-</div>
-
-@if (approved.length === 0) {
-<p>No approved services yet.</p>
-} @else {
-<div class="list">
-    @for (item of approved; track item.id) {
-    <div style="border-bottom: 1px solid #ccc; padding: 10px; margin-bottom: 5px;">
-        <h3>{{ item.name }}</h3>
-        <p><strong>Category:</strong> {{ item.category }}</p>
-        <p><strong>Address:</strong> {{ item.address }}</p>
+<div class="content-wrapper">
+    <!-- Left column: Scrollable list -->
+    <div class="list-column">
+        @if (approved.length === 0) {
+        <div class="empty-state">
+            <p>No approved services yet.</p>
+        </div>
+        } @else {
+        <div class="list-container">
+            @for (item of approved; track item.id) {
+            <div class="service-card">
+                <h3>{{ item.name }}</h3>
+                <div class="service-info">
+                    <p><strong>Category:</strong> {{ item.category }}</p>
+                    <p><strong>Address:</strong> {{ item.address }}</p>
+                </div>
+            </div>
+            }
+        </div>
+        }
     </div>
-    }
+
+    <!-- Right column: Map -->
+    <div class="map-column">
+        <div class="map-container" leaflet [leafletOptions]="options" [leafletLayers]="layers" (leafletMapReady)="onMapReady($event)">
+        </div>
+    </div>
 </div>
-}

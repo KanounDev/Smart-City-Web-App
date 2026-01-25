@@ -49,7 +49,7 @@ form select:focus {
     box-shadow: 0 0 0 4px rgba(0, 209, 255, 0.2);
 }
 
-form button {
+form button[type="submit"] {
     background: linear-gradient(to right, var(--primary-blue), var(--accent-cyan));
     color: var(--text-light);
     width: 100%;
@@ -59,12 +59,129 @@ form button {
     cursor: pointer;
     font-weight: 600;
     transition: var(--transition);
+    margin-top: 10px;
 }
 
-form button:hover {
+form button[type="submit"]:hover {
     background: linear-gradient(to right, var(--accent-cyan), var(--primary-blue));
     box-shadow: 0 0 12px var(--neon-glow);
     transform: translateY(-2px);
+}
+
+
+/* Updated: Styles for file upload section */
+
+.file-upload-section {
+    border: 2px dashed rgba(0, 123, 255, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.file-upload-section:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 209, 255, 0.05);
+}
+
+
+/* New: Custom file upload button styling */
+
+.custom-file-upload {
+    display: inline-block;
+    background: linear-gradient(to right, var(--primary-blue), var(--accent-cyan));
+    color: var(--text-light);
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    margin-bottom: 10px;
+    /* Space below button */
+}
+
+.custom-file-upload:hover {
+    background: linear-gradient(to right, var(--accent-cyan), var(--primary-blue));
+    box-shadow: 0 0 12px var(--neon-glow);
+    transform: translateY(-2px);
+}
+
+.upload-hint {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 10px 0;
+}
+
+.file-preview {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.file-preview h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: var(--primary-blue);
+}
+
+.file-preview ul {
+    list-style: none;
+    padding: 0;
+}
+
+.file-preview li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* This vertically centers the text and button */
+    background: #f8f9fa;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+    gap: 10px;
+    /* Adds space between text and button */
+}
+
+.file-name {
+    word-break: break-all;
+    /* Forces long names to wrap */
+    flex: 1;
+    /* Takes up available space */
+    margin-right: 10px;
+}
+
+.file-preview li:hover {
+    background: #e6f0fa;
+}
+
+.remove-btn {
+    background: var(--danger-red);
+    color: white;
+    border: none;
+    /* FIX: Use auto width/height to fit the text "Remove" */
+    width: auto;
+    height: auto;
+    border-radius: 6px;
+    /* Standard rounded corners instead of circle */
+    padding: 6px 12px;
+    /* Add padding around text */
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    /* Prevents button text from wrapping */
+    /* Flex alignment for the 'x' and text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-btn:hover {
+    background: #d32f2f;
+    /* Darker red on hover */
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(255, 45, 85, 0.4);
 }
 
 @media (max-width: 768px) {

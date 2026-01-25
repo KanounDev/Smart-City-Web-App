@@ -3,6 +3,9 @@ package com.example.smartcity.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List; // New
+import java.util.ArrayList; // New
+
 @Document(collection = "requests")
 public class ServiceRequest {
     @Id
@@ -16,4 +19,5 @@ public class ServiceRequest {
     public String status = "PENDING";  // PENDING, APPROVED, REJECTED
     public String ownerId;
     public String comments;  // For admin/owner communication
+    public List<String> documents = new ArrayList<>(); // New: List of file paths/URLs
 }

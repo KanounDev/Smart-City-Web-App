@@ -1,6 +1,5 @@
 :root {
     --primary-blue: #0066cc;
-    /* slightly deeper modern blue */
     --accent-cyan: #00c4ff;
     --success-green: #00d084;
     --warning-orange: #ffaa00;
@@ -11,11 +10,23 @@
     --text-light: #ffffff;
     --card-shadow: 0 4px 20px rgba(0, 119, 255, 0.12);
     --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    --nav-bg: rgba(6, 70, 140, 0.92);
-    /* deeper blue, more opaque */
-    --nav-backdrop: blur(12px);
+    --nav-bg: rgba(0, 150, 136, 0.48);
+    /* ← more transparent teal */
+    --nav-backdrop: blur(14px);
+    /* ← slightly stronger blur */
     --text-shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.4);
-    /* subtle shadow for readability */
+}
+
+#vanta-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    /* Ensures it sits behind everything */
+    pointer-events: none;
+    /* Allows clicks to pass through to the form/links */
 }
 
 @keyframes subtleGlow {
@@ -27,8 +38,20 @@
     }
 }
 
+html,
 body {
-    background: var(--bg-gradient);
+    height: 100%;
+    /* New: Force full height */
+    margin: 0;
+    /* New: Remove default margins */
+    padding: 0;
+    /* New: Remove padding */
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+}
+
+body {
+    background: transparent;
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -46,15 +69,14 @@ nav {
     backdrop-filter: var(--nav-backdrop);
     -webkit-backdrop-filter: var(--nav-backdrop);
     padding: 1.1rem 2.8rem;
-    /* a bit taller */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     position: sticky;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .nav-left,
@@ -175,6 +197,8 @@ main {
     padding: 2.5rem 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
+    min-height: calc(100vh - 60px);
+    /* New: Ensure content fills height minus nav (adjust 60px to your nav height) */
 }
 
 @media (max-width: 768px) {

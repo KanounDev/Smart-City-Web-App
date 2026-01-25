@@ -1,59 +1,170 @@
 h1 {
     text-align: center;
-    margin-bottom: 30px;
+    margin: 2rem 0 1.5rem;
     color: var(--primary-blue);
-    font-size: 2.5rem;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+    font-size: 2.4rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2rem;
+    min-height: 70vh;
+    /* give some breathing room */
+}
+
+.list-column {
+    flex: 1 1 38%;
+    /* list takes ~38% width */
+    max-width: 420px;
+}
+
+.map-column {
+    flex: 1 1 62%;
+    /* map takes more space */
+    display: flex;
+    flex-direction: column;
 }
 
 .map-container {
-    height: 500px;
-    margin-bottom: 30px;
+    flex: 1;
+    /* map grows to fill available height */
+    min-height: 500px;
+    height: 100%;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: var(--card-shadow);
+    border: 1px solid rgba(0, 123, 255, 0.12);
     transition: var(--transition);
+    background: #f8fcff;
+    /* subtle bg if map loads slowly */
 }
 
 .map-container:hover {
-    box-shadow: 0 8px 24px rgba(0, 209, 255, 0.25);
-}
-
-.list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.list div {
-    background: #ffffff;
-    /* Solid */
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    transition: var(--transition);
-}
-
-.list div:hover {
-    box-shadow: 0 8px 24px rgba(0, 209, 255, 0.25);
+    box-shadow: 0 12px 32px rgba(0, 123, 255, 0.18);
     transform: translateY(-4px);
 }
 
-.list h3 {
-    margin-bottom: 15px;
+
+/* Scrollable list container */
+
+.list-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    max-height: 70vh;
+    /* ← key: controls scroll height */
+    overflow-y: auto;
+    /* only vertical scroll when needed */
+    border: 1px solid rgba(0, 123, 255, 0.1);
+    scrollbar-width: thin;
+    /* firefox */
+    scrollbar-color: var(--accent-cyan) #f1f5f9;
+}
+
+
+/* For WebKit browsers (Chrome, Safari, Edge) */
+
+.list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.list-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+    background: var(--accent-cyan);
+    border-radius: 10px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+    background: #0099cc;
+}
+
+
+/* Individual service cards */
+
+.service-card {
+    background: #fafcff;
+    border: 1px solid rgba(0, 123, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1.2rem;
+    transition: var(--transition);
+}
+
+.service-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 123, 255, 0.12);
+    border-color: var(--accent-cyan);
+}
+
+.service-card h3 {
+    margin: 0 0 0.9rem;
     color: var(--text-dark);
-    font-size: 1.4rem;
+    font-size: 1.35rem;
+    font-weight: 600;
 }
 
-.list p {
+.service-info p {
+    margin: 0.5rem 0;
     font-size: 1rem;
-    color: #616161;
+    color: #4b5563;
 }
 
-@media (max-width: 768px) {
+.service-info strong {
+    color: var(--primary-blue);
+}
+
+
+/* Empty state */
+
+.empty-state {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    color: #6b7280;
+    font-size: 1.15rem;
+}
+
+
+/* ────────────────────────────────────────────────
+   Responsive: stack on smaller screens
+───────────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+    .content-wrapper {
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+    .list-column,
+    .map-column {
+        max-width: 100%;
+    }
+    .list-container {
+        max-height: 50vh;
+        /* smaller on mobile */
+    }
     .map-container {
-        height: 400px;
+        min-height: 420px;
+    }
+}
+
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+    }
+    .map-container {
+        min-height: 360px;
     }
 }

@@ -51,7 +51,8 @@ public class SecurityConfig {
                         // --- FIX END ---
 
                         .requestMatchers("/api/requests/my").hasAuthority("OWNER")
-                        .requestMatchers("/api/requests").hasAnyAuthority("OWNER", "ADMIN")
+                        // Update this line in SecurityConfig.java
+                        .requestMatchers("/api/requests").hasAnyAuthority("OWNER", "ADMIN","CITIZEN")
                         .requestMatchers("/api/requests/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 // ... rest of configuration ...

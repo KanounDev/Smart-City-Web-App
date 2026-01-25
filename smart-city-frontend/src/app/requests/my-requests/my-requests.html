@@ -1,11 +1,11 @@
 <h2>My Requests</h2>
 
 @if (requests.length === 0) {
-<p>No requests found.</p>
+<p class="no-requests">No requests found.</p>
 } @else {
 <div class="requests-list">
     @for (item of requests; track item.id) {
-    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+    <div class="request-card">
 
         @if (editingId !== item.id) {
         <h3>{{ item.name }}</h3>
@@ -13,23 +13,80 @@
         <p><strong>Description:</strong> {{ item.description }}</p>
         <p><strong>Address:</strong> {{ item.address }}</p>
         <p><strong>Status:</strong>
-            <span [style.color]="item.status === 'APPROVED' ? 'green' : (item.status === 'REJECTED' ? 'red' : 'orange')">
+            <span class="status-badge" [class]="getStatusClass(item.status)">
               {{ item.status }}
             </span>
         </p>
         <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
 
-        <div style="margin-top: 10px;">
-            <button (click)="startEdit(item)">Edit</button>
-            <button (click)="delete(item.id)" style="background-color: #ff4444; color: white; margin-left: 10px; border: none; padding: 5px 10px; cursor: pointer;">
-              Delete
-            </button>
+        <div class="documents-section">
+            <h4>Documents:</h4>
+
+            @if (item.documents && item.documents.length > 0) {
+            <ul class="file-list">
+                @for (doc of item.documents; track $index) {
+                <li>
+                    <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
+                      {{ getFileName(doc) }}
+                    </a> @if (item.status === 'PENDING') {
+                    <button type="button" (click)="deleteFile(item.id, $index)" class="remove-btn">
+                        × Remove
+                      </button> }
+                </li>
+                }
+            </ul>
+            } @else {
+            <p>No documents uploaded.</p>
+            }
+
+            <!-- Improved file upload area – only shown when PENDING -->
+            @if (item.status === 'PENDING') {
+            <div class="add-files">
+                <label>Ajouter des documents supplémentaires :</label>
+
+                <!-- Custom styled upload button -->
+                <label class="custom-file-upload" for="file-input-{{item.id}}">
+                  Choisir des fichiers
+                </label>
+
+                <!-- Hidden real input -->
+                <input id="file-input-{{item.id}}" type="file" multiple (change)="onAdditionalFilesChange($event, item.id)" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" hidden>
+
+                <!-- Safe local alias to avoid TS2532 error -->
+                <!-- Safe version – replace the entire <p class="upload-hint"> block -->
+                @let files = additionalFiles[item.id];
+
+                <p class="upload-hint">
+                    @if (files && files.length > 0) { {{ files.length }} fichier(s) sélectionné(s) } @else { Aucun fichier choisi }
+                </p>
+
+                <!-- Also update the disabled binding to be safe -->
+                <button type="button" (click)="uploadAdditionalFiles(item.id)" [disabled]="!files || files.length === 0" class="upload-action-btn">
+  Téléverser
+</button>
+            </div>
+            }
+        </div>
+
+        <div class="action-buttons">
+            @if (item.status === 'PENDING') {
+            <button class="edit" (click)="startEdit(item)">Edit</button> }
+            <button class="delete" (click)="delete(item.id)">Delete</button>
         </div>
         } @else {
-        <div style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
+        <!-- Edit form -->
+        <div style="margin-top: 10px;">
             <div style="margin-bottom: 10px;">
                 <label style="display:block">Name:</label>
                 <input [(ngModel)]="editForm.name" style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display:block">Category:</label>
+                <select [(ngModel)]="editForm.category" style="width: 100%;">
+                <option>Shop</option>
+                <option>Service</option>
+              </select>
             </div>
 
             <div style="margin-bottom: 10px;">
@@ -43,12 +100,8 @@
             </div>
 
             <div style="margin-top: 10px;">
-                <button (click)="saveEdit()" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">
-                Save
-              </button>
-                <button (click)="cancelEdit()" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">
-                Cancel
-              </button>
+                <button class="save" (click)="saveEdit()">Save</button>
+                <button class="cancel" (click)="cancelEdit()">Cancel</button>
             </div>
         </div>
         }
