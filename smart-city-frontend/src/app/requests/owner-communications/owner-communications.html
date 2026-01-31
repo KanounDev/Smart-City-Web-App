@@ -1,24 +1,21 @@
 <h2>Messages with Municipal Authority</h2>
 
 <div class="conversation-container">
-    @if (messages.length === 0) {
-    <p class="no-messages">No messages yet.</p>
-    } @else {
-    <div class="messages-container">
-        @for (message of messages; track $index) {
-        <div class="message" [class.admin-message]="message.sender === 'ADMIN'" [class.owner-message]="message.sender === 'OWNER'">
+    <div class="messages-container" #messagesContainer>
+        @if (messages.length === 0) {
+        <p class="no-messages">No messages yet.</p>
+        } @else { @for (message of messages; track $index) {
+        <div class="message" [class.owner-message]="message.senderRole === 'OWNER'" [class.admin-message]="message.senderRole === 'ADMIN'">
             <div class="message-content">
-                <p>{{ message.text }}</p>
-                <span class="timestamp">{{ message.timestamp }}</span>
+                <p>{{ message.content }}</p>
+                <span class="timestamp">{{ message.timestamp | date:'short' }}</span>
             </div>
         </div>
-        }
+        } }
     </div>
-    }
 
-    <!-- Input for new message -->
     <div class="message-input">
-        <input type="text" placeholder="Type a message..." disabled>
-        <button disabled>Send</button>
+        <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." (keyup.enter)="sendMessage()">
+        <button (click)="sendMessage()">Send</button>
     </div>
 </div>

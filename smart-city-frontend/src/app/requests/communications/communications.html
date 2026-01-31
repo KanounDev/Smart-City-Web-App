@@ -18,26 +18,27 @@
         }
     </div>
 
-    <!-- Right: Conversation panel -->
+    <!-- Right: Conversation -->
     <div class="conversation-panel">
         @if (!selectedOwner) {
         <p class="no-selection">Select an owner to view conversation.</p>
         } @else {
         <h3>Conversation with {{ selectedOwner.username }}</h3>
-        <div class="messages-container">
+
+        <div class="messages-container" #messagesContainer>
             @for (message of messages; track $index) {
-            <div class="message" [class.admin-message]="message.sender === 'ADMIN'" [class.owner-message]="message.sender === 'OWNER'">
+            <div class="message" [class.admin-message]="message.senderRole === 'ADMIN'" [class.owner-message]="message.senderRole === 'OWNER'">
                 <div class="message-content">
-                    <p>{{ message.text }}</p>
+                    <p>{{ message.content }}</p>
                     <span class="timestamp">{{ message.timestamp }}</span>
                 </div>
             </div>
             }
         </div>
-        <!-- Static input for simulation -->
+
         <div class="message-input">
-            <input type="text" placeholder="Type a message..." disabled>
-            <button disabled>Send</button>
+            <input type="text" [(ngModel)]="newMessage" placeholder="Type a message...">
+            <button (click)="sendMessage()">Send</button>
         </div>
         }
     </div>

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,6 +19,12 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser(Authentication auth) {
+        User current = (User) auth.getPrincipal();
+        return ResponseEntity.ok(current);
     }
 
     @PostMapping("/register")

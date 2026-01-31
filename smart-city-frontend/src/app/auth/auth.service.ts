@@ -23,7 +23,17 @@ export class AuthService {
   getToken() {
     return localStorage.getItem('token');
   }
-
+  getDecodedToken(): any {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload;
+    } catch (e) {
+      console.error('Token decode error', e);
+      return null;
+    }
+  }
   isLoggedIn() {
     return !!this.getToken();
   }
