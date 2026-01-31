@@ -1,16 +1,33 @@
 <h1>Approved Shops & Services</h1>
 
+<!-- New: Filters row -->
+<div class="filters-row">
+    <!-- In home.html – replace the search-container div with this -->
+    <div class="search-container">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" [(ngModel)]="searchQuery" (input)="updateFilters()" placeholder="Search by name, description, or address...">
+    </div>
+    <div class="category-filter">
+        <select [(ngModel)]="selectedCategory" (change)="updateFilters()">
+      <option value="">All Categories</option>
+      <option value="Shop">Shop</option>
+      <option value="Service">Service</option>
+    </select>
+    </div>
+</div>
+
 <div class="content-wrapper">
     <!-- Left column: Scrollable list -->
     <div class="list-column">
-        @if (approved.length === 0) {
+        @if (filteredApproved.length === 0) {
         <div class="empty-state">
-            <p>No approved services yet.</p>
+            <p>No approved services match your search.</p>
+            <!-- Updated text for filters -->
         </div>
         } @else {
         <div class="list-container">
-            @for (item of approved; track item.id) {
-            <div class="service-card">
+            @for (item of filteredApproved; track item.id) {
+            <div class="service-card" (click)="goToDetails(item.id)" style="cursor: pointer;">
                 <h3>{{ item.name }}</h3>
                 <div class="service-info">
                     <p><strong>Category:</strong> {{ item.category }}</p>

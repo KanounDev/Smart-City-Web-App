@@ -1,0 +1,100 @@
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--primary-blue);
+    font-size: 2rem;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.conversation-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    /* Adjust for nav/footer */
+}
+
+.no-messages {
+    text-align: center;
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid rgba(0, 123, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 70%;
+}
+
+.message-content {
+    padding: 10px 15px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-message {
+    margin-left: auto;
+}
+
+.admin-message .message-content {
+    background: var(--accent-cyan);
+    color: var(--text-light);
+}
+
+.owner-message .message-content {
+    background: #e5e7eb;
+    color: var(--text-dark);
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    display: block;
+    margin-top: 5px;
+}
+
+.message-input {
+    display: flex;
+    gap: 10px;
+}
+
+.message-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.message-input button {
+    padding: 10px 20px;
+    background: var(--primary-blue);
+    color: var(--text-light);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.message-input button:hover {
+    background: var(--accent-cyan);
+}
+
+@media (max-width: 768px) {
+    .conversation-container {
+        padding: 15px;
+    }
+}

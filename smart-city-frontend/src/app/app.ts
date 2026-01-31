@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef , HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet, Router } from '@angular/router';
 import { AuthService } from './auth/auth.service';
@@ -22,9 +22,43 @@ import * as THREE from 'three';
         @if (authService.getRole() === 'OWNER') {
           <a routerLink="/submit">Submit Request</a>
           <a routerLink="/my-requests">My Requests</a>
+          <a routerLink="/messages" class="messaging-icon" title="Messages">
+            <span class="material-icons">message</span>
+          </a>
         }
         @if (authService.getRole() === 'ADMIN') {
           <a routerLink="/admin">Admin Panel</a>
+          <a routerLink="/communications" class="messaging-icon" title="Messages">
+            <span class="material-icons">message</span>
+          </a>
+        }
+        <!-- New: Notification icon for CITIZEN or OWNER -->
+        @if (authService.getRole() === 'CITIZEN' || authService.getRole() === 'OWNER') {
+          <div class="notification-wrapper">
+            <span class="material-icons notification-icon" (click)="toggleNotifications()" title="Notifications">
+              notifications
+            </span>
+            @if (unreadCount > 0) {
+              <span class="unread-badge">{{ unreadCount }}</span>
+            }
+            @if (showNotifications) {
+              <div class="notifications-dropdown">
+                <h3>Notifications</h3>
+                @if (notifications.length === 0) {
+                  <p>No notifications yet.</p>
+                } @else {
+                  <ul>
+                    @for (notif of notifications; track $index) {
+                      <li>
+                        <p>{{ notif.message }}</p>
+                        <span class="timestamp">{{ notif.timestamp }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          </div>
         }
         <button (click)="logout()">Logout</button>
       } @else {
@@ -32,22 +66,40 @@ import * as THREE from 'three';
         <a routerLink="/register">Register</a>
       }
     </div>
-  </nav>
+   </nav>
 
-  <router-outlet></router-outlet>
+   <router-outlet />
   `,
   styleUrls: ['./app.css']
 })
 // 2. Implement AfterViewInit
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
-  
+
   // 3. Get reference to the background div
   @ViewChild('vantaBg') vantaBg!: ElementRef;
 
   constructor(public authService: AuthService, private router: Router) { }
 
   private vantaEffect: any;
+  showNotifications = false;
+  unreadCount = 3; // Static for demo
+  notifications = [
+    { message: 'Your shop request has been approved!', timestamp: '2 hours ago' },
+    { message: 'New service added nearby.', timestamp: 'Yesterday' },
+    { message: 'Reminder: Update your profile.', timestamp: '3 days ago' }
+  ];
 
+  toggleNotifications() {
+    this.showNotifications = !this.showNotifications;
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeNotifications(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.notification-wrapper')) {
+      this.showNotifications = false;
+    }
+  }
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);

@@ -50,6 +50,33 @@ body {
     /* Prevent horizontal scroll */
 }
 
+.messaging-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-light);
+    background: rgba(0, 150, 136, 0.3);
+    /* subtle teal background like nav */
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 1.4rem;
+}
+
+.messaging-icon:hover {
+    background: rgba(0, 196, 255, 0.5);
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(0, 196, 255, 0.4);
+}
+
+.messaging-icon.active,
+.messaging-icon[routerLinkActive] {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 16px rgba(0, 196, 255, 0.6);
+}
+
 body {
     background: transparent;
     background-size: cover;
@@ -219,5 +246,106 @@ main {
     .nav-right button {
         font-size: 0.98rem;
         padding: 0.55rem 1.15rem;
+    }
+}
+
+
+/* Existing styles remain unchanged */
+
+
+/* New: Notification styles */
+
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-light);
+    background: rgba(0, 150, 136, 0.3);
+    /* Matches messaging */
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1.4rem;
+}
+
+.notification-icon:hover {
+    background: rgba(0, 196, 255, 0.5);
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(0, 196, 255, 0.4);
+}
+
+.unread-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--danger-red);
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.notifications-dropdown {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    width: 320px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 1.2rem;
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notifications-dropdown h3 {
+    margin-bottom: 1rem;
+    color: var(--primary-blue);
+    font-size: 1.2rem;
+}
+
+.notifications-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notifications-dropdown li {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 123, 255, 0.1);
+    transition: var(--transition);
+}
+
+.notifications-dropdown li:hover {
+    background: #f8f9fa;
+}
+
+.notifications-dropdown p {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.notifications-dropdown .timestamp {
+    font-size: 0.85rem;
+    color: #6b7280;
+    display: block;
+    margin-top: 0.3rem;
+}
+
+@media (max-width: 768px) {
+    .notifications-dropdown {
+        width: 280px;
+        right: -20px;
     }
 }

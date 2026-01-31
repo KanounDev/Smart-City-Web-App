@@ -1,0 +1,44 @@
+<h2>Communications</h2>
+
+<div class="communications-container">
+    <!-- Left: List of owners -->
+    <div class="owner-list">
+        <h3>Owners</h3>
+        @if (owners.length === 0) {
+        <p class="no-owners">No owners to message.</p>
+        } @else {
+        <ul>
+            @for (owner of owners; track owner.id) {
+            <li [class.selected]="selectedOwner?.id === owner.id" (click)="selectOwner(owner)">
+                <span class="owner-name">{{ owner.username }}</span>
+                <span class="owner-status">({{ owner.requestsCount }} requests)</span>
+            </li>
+            }
+        </ul>
+        }
+    </div>
+
+    <!-- Right: Conversation panel -->
+    <div class="conversation-panel">
+        @if (!selectedOwner) {
+        <p class="no-selection">Select an owner to view conversation.</p>
+        } @else {
+        <h3>Conversation with {{ selectedOwner.username }}</h3>
+        <div class="messages-container">
+            @for (message of messages; track $index) {
+            <div class="message" [class.admin-message]="message.sender === 'ADMIN'" [class.owner-message]="message.sender === 'OWNER'">
+                <div class="message-content">
+                    <p>{{ message.text }}</p>
+                    <span class="timestamp">{{ message.timestamp }}</span>
+                </div>
+            </div>
+            }
+        </div>
+        <!-- Static input for simulation -->
+        <div class="message-input">
+            <input type="text" placeholder="Type a message..." disabled>
+            <button disabled>Send</button>
+        </div>
+        }
+    </div>
+</div>

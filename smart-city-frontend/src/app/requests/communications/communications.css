@@ -1,0 +1,161 @@
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--primary-blue);
+    font-size: 2rem;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.communications-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    height: calc(100vh - 150px);
+    /* Adjust for nav/footer */
+}
+
+.owner-list {
+    flex: 1 1 30%;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    overflow-y: auto;
+}
+
+.owner-list h3 {
+    margin-bottom: 15px;
+    color: var(--text-dark);
+}
+
+.owner-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.owner-list li {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 123, 255, 0.1);
+    transition: var(--transition);
+}
+
+.owner-list li:hover {
+    background: #f8f9fa;
+}
+
+.owner-list li.selected {
+    background: rgba(0, 209, 255, 0.1);
+    font-weight: 600;
+}
+
+.owner-name {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.owner-status {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.no-owners,
+.no-selection {
+    text-align: center;
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.conversation-panel {
+    flex: 1 1 70%;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.conversation-panel h3 {
+    margin-bottom: 15px;
+    color: var(--text-dark);
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid rgba(0, 123, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 70%;
+}
+
+.message-content {
+    padding: 10px 15px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-message {
+    margin-left: auto;
+}
+
+.admin-message .message-content {
+    background: var(--accent-cyan);
+    color: var(--text-light);
+}
+
+.owner-message .message-content {
+    background: #e5e7eb;
+    color: var(--text-dark);
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    display: block;
+    margin-top: 5px;
+}
+
+.message-input {
+    display: flex;
+    gap: 10px;
+}
+
+.message-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.message-input button {
+    padding: 10px 20px;
+    background: var(--primary-blue);
+    color: var(--text-light);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.message-input button:hover {
+    background: var(--accent-cyan);
+}
+
+@media (max-width: 768px) {
+    .communications-container {
+        flex-direction: column;
+    }
+    .owner-list,
+    .conversation-panel {
+        flex: none;
+    }
+}

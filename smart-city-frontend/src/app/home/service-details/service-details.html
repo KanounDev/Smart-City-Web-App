@@ -1,0 +1,79 @@
+<div class="details-container">
+    <button class="back-btn" (click)="goBack()">
+    ← Back to Map
+  </button>
+
+    <div class="shop-header">
+        <h1>{{ shop.name }}</h1>
+        <p class="category">{{ shop.category }}</p>
+        <p class="address"><strong>Address:</strong> {{ shop.address }}</p>
+        <p class="description">{{ shop.description }}</p>
+    </div>
+
+    <!-- Simple tabs simulation with sections -->
+    <div class="sections">
+        <!-- Overview -->
+        <section class="section overview">
+            <h2>Overview</h2>
+            @if (shop.documents && shop.documents.length > 0) {
+            <div class="documents">
+                <h3>Supporting Documents / Photos</h3>
+                <ul>
+                    @for (doc of shop.documents; track $index) {
+                    <li>
+                        <a [href]="doc.url" target="_blank">{{ doc.name }}</a>
+                    </li>
+                    }
+                </ul>
+            </div>
+            } @else {
+            <p>No documents available.</p>
+            }
+        </section>
+
+        <!-- Services Offered -->
+        <section class="section services">
+            <h2>Services / Products Offered</h2>
+            @if (services.length === 0) {
+            <p>No services listed yet.</p>
+            } @else {
+            <ul class="services-list">
+                @for (service of services; track $index) {
+                <li class="service-item">
+                    <strong>{{ service.name }}</strong>
+                    <p>{{ service.description }}</p>
+                    <span class="price">{{ service.price }}</span>
+                </li>
+                }
+            </ul>
+            }
+        </section>
+
+        <!-- Reviews -->
+        <section class="section reviews">
+            <h2>Reviews</h2>
+
+            <!-- Review Form (static/disabled) -->
+            <div class="review-form">
+                <textarea placeholder="Write your review..." rows="4" disabled></textarea>
+                <button disabled>Submit Review</button>
+            </div>
+
+            @if (reviews.length === 0) {
+            <p class="no-reviews">No reviews yet. Be the first!</p>
+            } @else {
+            <div class="reviews-list">
+                @for (review of reviews; track $index) {
+                <div class="review-card">
+                    <div class="review-header">
+                        <strong>{{ review.user }}</strong>
+                        <span class="date">{{ review.date }}</span>
+                    </div>
+                    <p>{{ review.comment }}</p>
+                </div>
+                }
+            </div>
+            }
+        </section>
+    </div>
+</div>

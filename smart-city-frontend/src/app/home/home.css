@@ -168,3 +168,118 @@ h1 {
         min-height: 360px;
     }
 }
+
+
+/* Existing styles remain unchanged */
+
+
+/* New: Filters row styles */
+
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto 1.5rem;
+    padding: 0 1.5rem;
+    justify-content: flex-start;
+}
+
+.search-container {
+    position: relative;
+    flex: 1 1 300px;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    /* keeps icon and input vertically aligned */
+    background: #f8f9fa;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.search-container:focus-within {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 209, 255, 0.1);
+}
+
+.search-icon {
+    padding: 0 12px;
+    color: #6b7280;
+    font-size: 1.3rem;
+    pointer-events: none;
+    line-height: 1;
+    /* helps icon centering */
+}
+
+.search-container input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0 12px 0 0;
+    /* no left padding anymore (icon takes space) */
+    font-size: 1rem;
+    outline: none;
+    height: 44px;
+    /* fixed height is important here */
+    line-height: 44px;
+    /* ← this is the key: matches height → vertical center */
+    color: var(--text-dark);
+}
+
+
+/* Optional: Make placeholder look good too */
+
+.search-container input::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+    /* some browsers fade placeholder */
+}
+
+.category-filter {
+    flex: 0 1 200px;
+}
+
+.category-filter select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 10px;
+    background: #f8f9fa;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.category-filter select:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 209, 255, 0.1);
+    outline: none;
+}
+
+
+/* Responsive: Stack on small screens */
+
+@media (max-width: 600px) {
+    .filters-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .search-container,
+    .category-filter {
+        flex: 1 1 auto;
+        max-width: none;
+    }
+}
+
+
+/* Updated empty-state for filters */
+
+.empty-state p {
+    font-size: 1.15rem;
+    /* Matches existing */
+}
+
+
+/* ... existing styles unchanged ... */
