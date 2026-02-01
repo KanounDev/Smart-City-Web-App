@@ -1,3 +1,4 @@
+// ServiceRequest.java
 package com.example.smartcity.model;
 
 import org.springframework.data.annotation.Id;
@@ -11,6 +12,7 @@ public class ServiceRequest {
     @Id
     public String id;
     public String name;
+    public String municipality;
     public String description;
     public String category;  // e.g., "Shop", "Service"
     public String address;   // Text location

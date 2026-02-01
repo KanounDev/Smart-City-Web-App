@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/conversations")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ConversationController {
+    
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;  // For requestsCount
@@ -34,15 +35,17 @@ public class ConversationController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    // Admins only: List all owners with basic info (id, username, requestsCount)
+    // Admins only: List all owners with basic info (id, username, requestsCount) filtered by admin's municipality
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getAllOwners(Authentication auth) {
         User current = (User) auth.getPrincipal();
         if (current.role != Role.ADMIN) {
             return ResponseEntity.status(403).build();
         }
+        String adminMunicipality = current.municipality;
+        
         List<User> owners = userRepository.findAll().stream()
-                .filter(u -> u.role == Role.OWNER)
+                .filter(u -> u.role == Role.OWNER && u.municipality.equals(adminMunicipality))
                 .collect(Collectors.toList());
 
         List<Map<String, Object>> ownerList = owners.stream().map(o -> {
@@ -56,25 +59,49 @@ public class ConversationController {
         return ResponseEntity.ok(ownerList);
     }
 
-    // Get conversation by ownerId (admins any, owners only own)
+    // Get conversation by ownerId (admins any in same muni, owners only own)
     @GetMapping("/{ownerId}")
     public ResponseEntity<Conversation> getConversation(@PathVariable String ownerId, Authentication auth) {
         User current = (User) auth.getPrincipal();
-        if (!current.id.equals(ownerId) && current.role != Role.ADMIN) {
+        User targetOwner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found"));  // Better exception handling
+        
+        if (current.role == Role.OWNER) {
+            if (!current.id.equals(ownerId)) {
+                return ResponseEntity.status(403).build();
+            }
+        } else if (current.role == Role.ADMIN) {
+            if (!current.municipality.equals(targetOwner.municipality)) {
+                return ResponseEntity.status(403).build();
+            }
+        } else {
             return ResponseEntity.status(403).build();
         }
+        
         return conversationRepository.findById(ownerId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.ok(new Conversation()));  // Return empty if none
     }
 
-    // Send message (admins to any, owners to own) + broadcast via WebSocket
+    // Send message (admins to any in same muni, owners to own) + broadcast via WebSocket
     @PostMapping("/{ownerId}/messages")
     public ResponseEntity<Void> sendMessage(@PathVariable String ownerId, @RequestBody String content, Authentication auth) {
         User current = (User) auth.getPrincipal();
-        if (!current.id.equals(ownerId) && current.role != Role.ADMIN) {
+        User targetOwner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found"));  // Better exception handling
+        
+        if (current.role == Role.OWNER) {
+            if (!current.id.equals(ownerId)) {
+                return ResponseEntity.status(403).build();
+            }
+        } else if (current.role == Role.ADMIN) {
+            if (!current.municipality.equals(targetOwner.municipality)) {
+                return ResponseEntity.status(403).build();
+            }
+        } else {
             return ResponseEntity.status(403).build();
         }
+        
         Conversation conv = conversationRepository.findById(ownerId).orElse(new Conversation());
         conv.id = ownerId;
         conv.ownerId = ownerId;

@@ -90,6 +90,36 @@ p a:hover {
     text-shadow: 0 0 5px var(--neon-glow);
 }
 
+
+/* ... (existing styles) */
+
+input[type="text"],
+input[type="password"],
+select {
+    /* existing */
+}
+
+
+/* NEW: Ensure new input matches */
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus {
+    /* existing */
+}
+
+
+/* Add spacing for the new field */
+
+form>div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+/* ... (rest unchanged) */
+
 @media (max-width: 480px) {
     .register-container {
         margin: 50px 20px;

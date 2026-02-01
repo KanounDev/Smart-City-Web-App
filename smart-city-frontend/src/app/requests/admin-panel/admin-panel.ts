@@ -1,8 +1,9 @@
+// admin-panel.ts
 import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RequestService } from '../request.service';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-admin-panel',
@@ -16,28 +17,23 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   activeTab: string = 'pending';
 
-  // Requests (static for now; later fetch all and filter)
+  // Requests
   allRequests: any[] = [];
   get pendingRequests() { return this.allRequests.filter(r => r.status === 'PENDING'); }
   get approvedRequests() { return this.allRequests.filter(r => r.status === 'APPROVED'); }
   get rejectedRequests() { return this.allRequests.filter(r => r.status === 'REJECTED'); }
 
-  // Categories static
-  categories: string[] = ['Shop', 'Service', 'Restaurant']; // Demo
+  // Categories
+  categories: any[] = [];
   newCategory: string = '';
-  editingCategoryIndex: number | null = null;
+  editingCategoryId: string | null = null;
   editCategoryValue: string = '';
 
   private updateSub!: Subscription;
-  requests: any[] = [];
 
  ngOnInit() {
-    // Static demo data (replace with real fetch later)
-    this.allRequests = [
-      { id: '1', name: 'Shop A', category: 'Shop', description: 'Desc', address: 'Addr', status: 'PENDING', comments: '', documents: [] },
-      { id: '2', name: 'Service B', category: 'Service', description: 'Desc', address: 'Addr', status: 'APPROVED', lat: 36.8, lng: 10.1, documents: [] },
-      { id: '3', name: 'Shop C', category: 'Shop', description: 'Desc', address: 'Addr', status: 'REJECTED', comments: 'Invalid docs', documents: [] }
-    ];
+    this.loadAllRequests();
+    this.loadCategories();
 
     if (this.requestService.getUpdates) {
       this.updateSub = this.requestService.getUpdates().subscribe((updatedItem: any) => {
@@ -46,53 +42,127 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
       });
     }
   }
-setTab(tab: string) {
-    this.activeTab = tab;
-  }
 
-  // Category CRUD (static)
-  addCategory() {
-    if (this.newCategory) {
-      this.categories.push(this.newCategory);
-      this.newCategory = '';
+ loadAllRequests() {
+  console.log('ADMIN PANEL: Starting to load requests...');
+
+  forkJoin({
+    pending: this.requestService.getRequestsByStatus('PENDING'),
+    approved: this.requestService.getRequestsByStatus('APPROVED'),
+    rejected: this.requestService.getRequestsByStatus('REJECTED')
+  }).subscribe({
+    next: (results) => {
+      console.log('ADMIN PANEL: Raw results →', results);
+
+      // Merge all results into one array (single source of truth)
+      const all = [
+        ...(results.pending   || []),
+        ...(results.approved  || []),
+        ...(results.rejected  || [])
+      ];
+
+      // Optional: remove duplicates if any overlap (by id)
+      const uniqueMap = new Map<string, any>();
+      all.forEach(req => uniqueMap.set(req.id, req));
+      this.allRequests = Array.from(uniqueMap.values());
+
+      console.log('ADMIN PANEL: Total unique requests loaded:', this.allRequests.length);
+      console.log('ADMIN PANEL: Pending count (via getter):', this.pendingRequests.length);
+
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('ADMIN PANEL: Failed to load requests', err);
+      if (err.status === 403) {
+        alert('403 Forbidden - Check if you are really logged in as ADMIN');
+      }
+      if (err.status === 0) {
+        alert('Network error - Backend not running?');
+      }
     }
-  }
+  });
+}
 
-  editCategory(index: number) {
-    this.editingCategoryIndex = index;
-    this.editCategoryValue = this.categories[index];
-  }
-
-  saveCategory(index: number) {
-    this.categories[index] = this.editCategoryValue;
-    this.editingCategoryIndex = null;
-  }
-
-  cancelEdit() {
-    this.editingCategoryIndex = null;
-  }
-
-  deleteCategory(index: number) {
-    this.categories.splice(index, 1);
-  }
-  ngOnDestroy() {
-    if (this.updateSub) this.updateSub.unsubscribe();
-  }
-
-  loadPendingRequests() {
-    this.requestService.getPending().subscribe({
+  loadCategories() {
+    this.requestService.getCategories().subscribe({
       next: (data) => {
-        this.requests = data || [];
+        this.categories = data || [];
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading pending requests', err);
-        alert('Failed to load requests. Check console.');
+        console.error('Error loading categories', err);
+        alert('Failed to load categories.');
       }
     });
   }
 
- handleRealTimeUpdate(item: any) {
+  setTab(tab: string) {
+    this.activeTab = tab;
+  }
+
+  // Category CRUD
+  addCategory() {
+    if (this.newCategory) {
+      this.requestService.addCategory({ name: this.newCategory }).subscribe({
+        next: (cat) => {
+          this.categories.push(cat);
+          this.newCategory = '';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Add category failed', err);
+          alert('Failed to add category.');
+        }
+      });
+    }
+  }
+
+  editCategory(id: string, name: string) {
+    this.editingCategoryId = id;
+    this.editCategoryValue = name;
+  }
+
+  saveCategory() {
+    if (this.editingCategoryId) {
+      this.requestService.updateCategory(this.editingCategoryId, { name: this.editCategoryValue }).subscribe({
+        next: () => {
+          const cat = this.categories.find(c => c.id === this.editingCategoryId);
+          if (cat) {
+            cat.name = this.editCategoryValue;
+          }
+          this.editingCategoryId = null;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Update category failed', err);
+          alert('Failed to update category.');
+        }
+      });
+    }
+  }
+
+  cancelEdit() {
+    this.editingCategoryId = null;
+  }
+
+  deleteCategory(id: string) {
+    this.requestService.deleteCategory(id).subscribe({
+      next: () => {
+        this.categories = this.categories.filter(c => c.id !== id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Delete category failed', err);
+        alert('Failed to delete category.');
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.updateSub) this.updateSub.unsubscribe();
+  }
+
+  handleRealTimeUpdate(item: any) {
     const index = this.allRequests.findIndex(r => r.id === item.id);
     if (index > -1) {
       this.allRequests[index] = item;
@@ -102,13 +172,12 @@ setTab(tab: string) {
     this.cdr.detectChanges();
   }
 
-  update(id: string, status: string, comments: string, lat: number | null, lng: number | null) {
+  updateRequest(id: string, status: string, comments: string, lat: number | null, lng: number | null) {
     const payload = { status, comments, lat, lng };
 
     this.requestService.updateRequest(id, payload).subscribe({
       next: () => {
-        // Optimistically remove from list (real-time will handle if needed)
-        this.requests = this.requests.filter(r => r.id !== id);
+        // Real-time will handle the update
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -126,7 +195,6 @@ setTab(tab: string) {
   getFileName(docPath: string): string {
     return docPath.split('/').pop() || 'Document';
   }
-  // ... rest of the class remains the same ...
 
   // Add this method (same as in MyRequestsComponent)
   public getStatusClass(status: string): string {

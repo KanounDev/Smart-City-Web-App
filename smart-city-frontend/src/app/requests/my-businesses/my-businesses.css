@@ -1,0 +1,503 @@
+.page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 4rem;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.4rem;
+    color: #1e40af;
+    margin: 1.5rem 0 2.5rem;
+    font-weight: 700;
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 2.5rem;
+    min-height: 65vh;
+}
+
+
+/* ── Left column ─────────────────────────────────────── */
+
+.business-list-column {
+    width: 340px;
+    flex-shrink: 0;
+}
+
+.business-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.business-card:hover,
+.business-card.active {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.12);
+    transform: translateY(-2px);
+}
+
+.business-category {
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    margin-bottom: 0.35rem;
+}
+
+.business-address {
+    color: #4b5563;
+    font-size: 0.98rem;
+}
+
+
+/* ── Right column ────────────────────────────────────── */
+
+.business-details-column {
+    flex: 1;
+    background: white;
+    border-radius: 16px;
+    padding: 2.2rem 2.8rem;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+    min-height: 500px;
+}
+
+.business-header {
+    margin-bottom: 2.8rem;
+}
+
+.business-category-large {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    margin-bottom: 0.9rem;
+}
+
+.business-address-large {
+    font-size: 1.18rem;
+    color: #1f2937;
+    margin-bottom: 1.1rem;
+    font-weight: 500;
+}
+
+.business-description {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #4b5563;
+}
+
+
+/* ── Services section ───────────────────────────────── */
+
+.section {
+    margin-top: 3rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.6rem;
+}
+
+.section h2 {
+    margin: 0;
+    font-size: 1.45rem;
+    color: #1f2937;
+}
+
+.btn-add {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.service-item {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border: 1px solid #e5e7eb;
+    gap: 1rem;
+}
+
+.service-main {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.service-name {
+    font-size: 1.22rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.4rem;
+}
+
+.service-description {
+    color: #6b7280;
+    line-height: 1.55;
+}
+
+.service-price {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    white-space: nowrap;
+    min-width: 110px;
+    text-align: right;
+    padding-top: 0.4rem;
+}
+
+.service-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 90px;
+}
+
+.btn-edit {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background: #2563eb;
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}
+
+
+/* Inline editing */
+
+.edit-form {
+    flex: 1;
+}
+
+.edit-input {
+    width: 100%;
+    padding: 0.7rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.edit-textarea {
+    width: 100%;
+    padding: 0.7rem;
+    height: 80px;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    resize: vertical;
+    font-size: 1rem;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-left: 1rem;
+}
+
+.btn-save {
+    background: #22c55e;
+    color: white;
+    padding: 0.55rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    background: #16a34a;
+}
+
+.btn-cancel {
+    background: #e5e7eb;
+    color: #1f2937;
+    padding: 0.55rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+
+/* Empty / loading / placeholder */
+
+.empty-state,
+.placeholder,
+.no-services,
+.coming-soon,
+.loading {
+    text-align: center;
+    color: #6b7280;
+    padding: 4rem 1rem;
+    font-size: 1.15rem;
+}
+
+.empty-state small,
+.coming-soon {
+    display: block;
+    margin-top: 0.8rem;
+    font-size: 1rem;
+    color: #9ca3af;
+}
+
+.loading {
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* Modal Styles */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal {
+    background: white;
+    width: 90%;
+    max-width: 480px;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.delete-modal {
+    max-width: 420px;
+}
+
+.modal h3 {
+    margin-top: 0;
+    color: #1d4ed8;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.delete-modal h3 {
+    color: #ef4444;
+}
+
+.form-group {
+    margin-bottom: 1.4rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.9rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-save {
+    background: #3b82f6;
+    color: white;
+    padding: 0.8rem 1.6rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+.btn-cancel {
+    background: #e5e7eb;
+    color: #1f2937;
+    padding: 0.8rem 1.6rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+.btn-delete-confirm {
+    background: #ef4444;
+    color: white;
+    padding: 0.8rem 1.6rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+.btn-delete-confirm:hover {
+    background: #dc2626;
+}
+
+.service-to-delete {
+    font-weight: 600;
+    color: #1f2937;
+    margin: 1rem 0;
+    padding: 0.8rem;
+    background: #fef2f2;
+    border-radius: 8px;
+    text-align: center;
+}
+
+
+/* Add this to the end of my-businesses.css for reviews section */
+
+
+/* Reviews Header */
+
+.reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0 1rem;
+}
+
+.reviews-header h2 {
+    font-size: 1.6rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+
+/* Reviews List */
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-item {
+    background: #f9fafb;
+    padding: 1.25rem;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.review-item:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.review-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.review-info strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.rating {
+    background: #fef3c7;
+    color: #d97706;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.date {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-left: auto;
+}
+
+.review-item p {
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0;
+}
+
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+    .content-wrapper {
+        flex-direction: column;
+    }
+    .business-list-column {
+        width: 100%;
+    }
+}

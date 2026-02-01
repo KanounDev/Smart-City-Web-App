@@ -1,0 +1,153 @@
+<div class="page-container">
+    <h1>My Businesses</h1>
+
+    <div class="content-wrapper">
+        <!-- Left column -->
+        <div class="business-list-column">
+            @if (businesses.length === 0) {
+            <div class="empty-state">
+                <p>No approved businesses yet</p>
+                <small>Once your requests are approved, they will appear here.</small>
+            </div>
+            } @else { @for (business of businesses; track business.id) {
+            <div class="business-card" [class.active]="selectedBusiness?.id === business.id" (click)="selectBusiness(business)">
+                <div class="business-category">{{ business.category }}</div>
+                <div class="business-address">{{ business.address }}</div>
+            </div>
+            } }
+        </div>
+
+        <!-- Right column -->
+        <div class="business-details-column">
+            @if (!selectedBusiness) {
+            <div class="placeholder">
+                <p>Select a business from the left to view details</p>
+            </div>
+            } @else {
+            <div class="business-header">
+                <div class="business-category-large">{{ selectedBusiness.category }}</div>
+                <div class="business-address-large">Address: {{ selectedBusiness.address }}</div>
+                <div class="business-description">{{ selectedBusiness.description }}</div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2>Services / Products Offered</h2>
+                    <button class="btn-add" (click)="openAddModal()">+ Add Service</button>
+                </div>
+
+                @if (isLoadingServices) {
+                <p class="loading">Loading services...</p>
+                } @else if (services.length === 0) {
+                <p class="no-services">No services added yet.</p>
+                } @else {
+                <div class="services-list">
+                    @for (service of services; track $index) {
+                    <div class="service-item">
+                        @if (editingIndex === $index) {
+                        <!-- Inline Edit Mode -->
+                        <div class="edit-form">
+                            <input [(ngModel)]="editForm.name" class="edit-input" placeholder="Service name">
+                            <textarea [(ngModel)]="editForm.description" class="edit-textarea" placeholder="Description"></textarea>
+                            <input [(ngModel)]="editForm.price" class="edit-input" placeholder="Price (e.g. 89 TND)">
+                        </div>
+                        <div class="edit-actions">
+                            <button class="btn-save" (click)="$event.stopPropagation(); saveEdit($index)">
+    Save
+  </button>
+                            <button class="btn-cancel" (click)="$event.stopPropagation(); cancelEdit()">
+    Cancel
+  </button>
+                        </div>
+                        } @else {
+                        <!-- Normal View -->
+                        <div class="service-main">
+                            <div class="service-name">{{ service.name }}</div>
+                            <div class="service-description">{{ service.description }}</div>
+                        </div>
+                        <div class="service-price">{{ service.price }}</div>
+                        <div class="service-actions">
+                            <button class="btn-edit" (click)="startEdit($index)">Edit</button>
+                            <button class="btn-delete" (click)="openDeleteModal($index)">Delete</button>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="reviews-header">
+                <h2>Customer Reviews</h2>
+            </div>
+
+            @if (isLoadingReviews) {
+            <p>Loading reviews...</p>
+            } @else if (reviews.length === 0) {
+            <div class="empty-state">
+                <p>No reviews yet</p>
+                <small>Reviews from customers will appear here.</small>
+            </div>
+            } @else {
+            <div class="reviews-list">
+                @for (review of reviews; track $index) {
+                <div class="review-item">
+                    <div class="review-info">
+                        <strong>{{ review.userId }}</strong>
+                        <!-- Username -->
+                        <span class="rating">{{ review.rating }} / 5</span>
+                        <span class="date">{{ review.date | date:'medium' }}</span>
+                    </div>
+                    <p>{{ review.comment }}</p>
+                </div>
+                }
+            </div>
+            } }
+        </div>
+    </div>
+
+    <!-- Add Service Modal -->
+    @if (showAddModal) {
+    <div class="modal-overlay" (click)="closeAddModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <h3>Add New Service</h3>
+            <div class="form-group">
+                <label>Service Name</label>
+                <input [(ngModel)]="newService.name" placeholder="e.g. Running Shoes">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea [(ngModel)]="newService.description" rows="3" placeholder="Brief description"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Price (e.g. 89 TND)</label>
+                <input [(ngModel)]="newService.price" placeholder="89 TND">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" (click)="closeAddModal()">Cancel</button>
+                <button class="btn-save" (click)="$event.stopPropagation(); saveNewService()" [disabled]="!newService.name">
+    Add Service
+  </button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Delete Confirmation Modal -->
+    @if (showDeleteModal) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+        <div class="modal delete-modal" (click)="$event.stopPropagation()">
+            <h3>Delete Service</h3>
+            <p>Are you sure you want to delete this service?</p>
+            <p class="service-to-delete">{{ serviceToDelete?.name }}</p>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+                <button class="btn-delete-confirm" (click)="$event.stopPropagation(); confirmDelete()">
+    Yes, Delete
+  </button>
+            </div>
+        </div>
+    </div>
+    }
+</div>

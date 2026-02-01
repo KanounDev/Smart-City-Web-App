@@ -22,6 +22,7 @@ import * as THREE from 'three';
         @if (authService.getRole() === 'OWNER') {
           <a routerLink="/submit">Submit Request</a>
           <a routerLink="/my-requests">My Requests</a>
+          <a routerLink="/my-businesses">My Businesses</a>
           <a routerLink="/messages" class="messaging-icon" title="Messages">
             <span class="material-icons">message</span>
           </a>
@@ -32,8 +33,6 @@ import * as THREE from 'three';
             <span class="material-icons">message</span>
           </a>
         }
-        <!-- New: Notification icon for CITIZEN or OWNER -->
-        @if (authService.getRole() === 'CITIZEN' || authService.getRole() === 'OWNER') {
           <div class="notification-wrapper">
             <span class="material-icons notification-icon" (click)="toggleNotifications()" title="Notifications">
               notifications
@@ -59,7 +58,6 @@ import * as THREE from 'three';
               </div>
             }
           </div>
-        }
         <button (click)="logout()">Logout</button>
       } @else {
         <a routerLink="/login">Login</a>

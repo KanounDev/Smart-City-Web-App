@@ -20,26 +20,16 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
-  getToken() {
+  getToken(): string | null {
     return localStorage.getItem('token');
   }
-  getDecodedToken(): any {
-    const token = this.getToken();
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload;
-    } catch (e) {
-      console.error('Token decode error', e);
-      return null;
-    }
-  }
-  isLoggedIn() {
-    return !!this.getToken();
+
+  isLoggedIn(): boolean {
+    return this.getToken() !== null;
   }
 
-  // Decode JWT to get role (simple, no lib)
   private _role: string | null = null;
+  private _municipality: string | null = null;  // NEW: Cache for municipality
 
   getRole(): string | null {
     if (this._role !== null) return this._role;  // cache hit
@@ -51,6 +41,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       console.log('JWT payload (first read):', payload);
       this._role = payload.role || null;
+      this._municipality = payload.municipality || null;  // NEW: Extract municipality
       return this._role;
     } catch (e) {
       console.error('JWT decode error:', e);
@@ -58,8 +49,16 @@ export class AuthService {
     }
   }
 
+  // NEW: Getter for municipality
+  getMunicipality(): string | null {
+    if (this._municipality !== null) return this._municipality;
+    this.getRole();  // Triggers extraction if not cached
+    return this._municipality;
+  }
+
   logout() {
     localStorage.removeItem('token');
     this._role = null;  // reset cache
+    this._municipality = null;  // NEW: Reset municipality cache
   }
 }

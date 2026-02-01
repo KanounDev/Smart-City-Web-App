@@ -80,6 +80,20 @@ p a:hover {
     text-shadow: 0 0 5px var(--neon-glow);
 }
 
+
+/* Add to existing */
+
+form>div {
+    margin-top: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--primary-blue);
+}
+
 @media (max-width: 480px) {
     .login-container {
         margin: 50px 20px;

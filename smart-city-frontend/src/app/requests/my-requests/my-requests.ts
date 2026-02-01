@@ -19,7 +19,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
   requests: any[] = [];
   editingId: string | null = null;
   editForm: any = {};
-
+  selectedStatus: string = '';
   additionalFiles: { [requestId: string]: File[] } = {};
 
   private updateSub!: Subscription;
@@ -51,8 +51,14 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
       });
     }
   }
-
- ngOnDestroy() {
+  get filteredRequests(): any[] {
+    if (!this.selectedStatus) return this.requests;
+    return this.requests.filter(r => r.status === this.selectedStatus);
+  }
+  onFilterChange() {
+    this.cdr.detectChanges();
+  }
+  ngOnDestroy() {
     if (this.updateSub) this.updateSub.unsubscribe();
   }
 
@@ -124,7 +130,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
   public delete(id: string) {  // Public
     if (confirm('Are you sure you want to delete this request?')) {
       this.requestService.deleteRequest(id).subscribe({
-        next: () => {},  // No response body, but can handle
+        next: () => { },  // No response body, but can handle
         error: (err: any) => alert('Error deleting request')  // Typed
       });
     }

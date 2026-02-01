@@ -1,8 +1,22 @@
 <div class="login-container">
     <h2>Login</h2>
-    <form (submit)="login()">
+    <form (submit)="login(); $event.preventDefault()">
         <input type="text" placeholder="Username" [(ngModel)]="user.username" name="username" required>
+
         <input type="password" placeholder="Password" [(ngModel)]="user.password" name="password" required>
+
+        <!-- NEW: Role selector to show/hide municipality -->
+        <select [(ngModel)]="user.role" name="role" (change)="updateForm()">
+            <option value="CITIZEN">Citizen</option>
+            <option value="OWNER">Business Owner</option>
+            <option value="ADMIN">Admin / Municipal Authority</option>
+        </select>
+
+        <div *ngIf="showMunicipality || user.role !== 'CITIZEN'">
+            <label>Municipality:</label>
+            <input type="text" placeholder="e.g. Tunis, Sfax, Ariana" [(ngModel)]="user.municipality" name="municipality" required [attr.required]="user.role !== 'CITIZEN' ? 'required' : null">
+        </div>
+
         <button type="submit">Login</button>
     </form>
     <p><a routerLink="/register">Don't have an account? Register here</a></p>

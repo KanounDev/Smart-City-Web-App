@@ -1,302 +1,474 @@
 package com.example.smartcity.controller;
 
 import com.example.smartcity.model.ServiceRequest;
+import com.example.smartcity.model.User;
 import com.example.smartcity.repository.RequestRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.http.ResponseEntity;
+import com.example.smartcity.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.File;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import java.io.InputStream; // New: For serving files
-import org.springframework.core.io.InputStreamResource; // New: For download
+import org.springframework.core.io.InputStreamResource;
 
+/**
+ * REST controller for managing service requests.
+ */
 @RestController
 @RequestMapping("/api/requests")
 @CrossOrigin(origins = "http://localhost:4200")
 public class RequestController {
+
+    private static final Logger logger = LoggerFactory.getLogger(RequestController.class);
+
     private final RequestRepository repository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
 
-    private final String uploadDir = "uploads/requests/";
-
-    public RequestController(RequestRepository repository, SimpMessagingTemplate messagingTemplate) {
+    public RequestController(RequestRepository repository,
+            SimpMessagingTemplate messagingTemplate,
+            UserRepository userRepository) {
         this.repository = repository;
         this.messagingTemplate = messagingTemplate;
+        this.userRepository = userRepository;
+    }
+
+    // ────────────────────────────────────────────────
+    // GET Endpoints
+    // ────────────────────────────────────────────────
+
+    @GetMapping
+    public List<ServiceRequest> getAll() {
+        logger.info("Fetching all requests");
+        return repository.findAll();
+    }
+
+    @GetMapping("/pending")
+    public List<ServiceRequest> getPending(Authentication auth) {
+        User admin = (User) auth.getPrincipal();
+        String municipality = admin.municipality;
+        logger.info("Fetching pending requests for municipality: {}", municipality);
+        return repository.findByStatusAndMunicipality("PENDING", municipality);
     }
 
     @GetMapping("/approved")
-    public List<ServiceRequest> getApproved() {
-        return repository.findByStatus("APPROVED");
+    public List<ServiceRequest> getApproved(Authentication auth) {
+        User admin = (User) auth.getPrincipal();
+        String municipality = admin.municipality;
+        logger.info("Fetching approved requests for municipality: {}", municipality);
+        return repository.findByStatusAndMunicipality("APPROVED", municipality);
+    }
+    @GetMapping("/approved/public")
+public List<ServiceRequest> getApprovedPublic() {
+    logger.info("Public request for approved businesses");
+    return repository.findByStatusAndLatIsNotNullAndLngIsNotNull("APPROVED");
+}
+    @GetMapping("/rejected")
+    public List<ServiceRequest> getRejected(Authentication auth) {
+        User admin = (User) auth.getPrincipal();
+        String municipality = admin.municipality;
+        logger.info("Fetching rejected requests for municipality: {}", municipality);
+        return repository.findByStatusAndMunicipality("REJECTED", municipality);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ServiceRequest> getById(@PathVariable String id) {
+        return repository.findById(id)
+                .<ResponseEntity<ServiceRequest>>map(ResponseEntity::ok)
+                .orElseGet(ResponseEntity.notFound()::build);
     }
 
     @GetMapping("/my")
-    public List<ServiceRequest> getMyRequests(Authentication auth) {
-        String ownerId;
-        try {
-            com.example.smartcity.model.User user = (com.example.smartcity.model.User) auth.getPrincipal();
-            ownerId = user.id;
-        } catch (Exception e) {
-            System.err.println("Failed to get ownerId from principal: " + e.getMessage());
-            return new ArrayList<>();
+    public List<ServiceRequest> getByOwner(Authentication auth) {
+        String ownerId = extractUserId(auth);
+        logger.info("Fetching requests for owner: {}", ownerId);
+        return repository.findByOwnerId(ownerId);
+    }
+
+    @GetMapping("/owners")
+    public List<Map<String, Object>> getOwners(Authentication auth) {
+        if (!isAdmin(auth)) {
+            throw new IllegalStateException("Admin only");
         }
+        User admin = (User) auth.getPrincipal();
+        String adminMuni = admin.municipality;
+        logger.info("Fetching owners list for admin in municipality: {}", adminMuni);
 
-        System.out.println("Fetching requests for Owner ID: " + ownerId);
+        List<ServiceRequest> all = repository.findByMunicipality(adminMuni);
+        Set<String> ownerIds = all.stream().map(r -> r.ownerId).collect(Collectors.toSet());
 
-        List<ServiceRequest> requests = repository.findByOwnerId(ownerId);
+        List<Map<String, Object>> owners = new ArrayList<>();
+        for (String ownerId : ownerIds) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", ownerId);
 
-        // ── ADD THESE LINES ────────────────────────────────────────────────
-        System.out.println("Found " + requests.size() + " requests");
-        if (!requests.isEmpty()) {
-            System.out.println("First request ID: " + requests.get(0).id);
-            System.out.println("First request ownerId: " + requests.get(0).ownerId);
-            System.out.println("First request name: " + requests.get(0).name);
-        } else {
-            System.out.println("No requests found for this ownerId in database");
+            userRepository.findById(ownerId).ifPresent(user -> {
+                map.put("username", user.username);
+            });
+
+            long count = all.stream().filter(r -> r.ownerId.equals(ownerId)).count();
+            map.put("requestsCount", count);
+
+            owners.add(map);
         }
-        // ───────────────────────────────────────────────────────────────────
-
-        return requests;
+        return owners;
     }
 
-    @PostMapping("/{id}/documents")
-    public ResponseEntity<ServiceRequest> addDocuments(@PathVariable String id,
-            @RequestParam("additionalDocuments") List<MultipartFile> documents, Authentication auth) {
-        String currentUserId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
+    // ────────────────────────────────────────────────
+    // POST / PUT / DELETE
+    // ────────────────────────────────────────────────
 
-        return repository.findById(id).<ResponseEntity<ServiceRequest>>map(existing -> {
-            if (!existing.ownerId.equals(currentUserId) || !"PENDING".equals(existing.status)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).<ServiceRequest>build();
-            }
-
-            String requestUploadDir = uploadDir + id + "/";
-            try {
-                Files.createDirectories(Paths.get(requestUploadDir));
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-
-            for (MultipartFile file : documents) {
-                if (!file.isEmpty()) {
-                    try {
-                        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                        Path filePath = Paths.get(requestUploadDir + fileName);
-                        Files.copy(file.getInputStream(), filePath);
-                        existing.documents.add(requestUploadDir + fileName);
-                    } catch (IOException e) {
-                        System.err.println("Failed to save file: " + file.getOriginalFilename());
-                    }
-                }
-            }
-
-            ServiceRequest saved = repository.save(existing);
-            messagingTemplate.convertAndSend("/topic/requests", saved);
-            return ResponseEntity.ok(saved);
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    // New: Delete a specific document (Owner only)
-    @DeleteMapping("/{id}/documents/{index}")
-    public ResponseEntity<ServiceRequest> deleteDocument(@PathVariable String id, @PathVariable int index,
-            Authentication auth) {
-        String currentUserId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
-
-        return repository.findById(id).map(existing -> {
-            if (!existing.ownerId.equals(currentUserId) || !"PENDING".equals(existing.status)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).<ServiceRequest>build();
-            }
-
-            if (index < 0 || index >= existing.documents.size()) {
-                return ResponseEntity.badRequest().<ServiceRequest>build();
-            }
-
-            String filePath = existing.documents.get(index);
-            try {
-                Files.deleteIfExists(Paths.get(filePath)); // Delete from disk
-            } catch (IOException e) {
-                System.err.println("Failed to delete file: " + filePath);
-            }
-
-            existing.documents.remove(index);
-            ServiceRequest saved = repository.save(existing);
-            messagingTemplate.convertAndSend("/topic/requests", saved);
-            return ResponseEntity.ok(saved);
-        }).orElse(ResponseEntity.notFound().<ServiceRequest>build());
-    }
-
-    // New: Download a specific document (Owner or Admin)
-    @GetMapping("/{id}/documents/{index}")
-    public ResponseEntity<InputStreamResource> downloadDocument(@PathVariable String id, @PathVariable int index,
-            Authentication auth) {
-        String currentUserId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
-        String currentRole = ((com.example.smartcity.model.User) auth.getPrincipal()).role.toString(); // Assuming role
-                                                                                                       // in User
-
-        return repository.findById(id).map(existing -> {
-            boolean isOwner = existing.ownerId.equals(currentUserId);
-            boolean isAdmin = "ADMIN".equals(currentRole);
-            if (!isOwner && !isAdmin) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).<InputStreamResource>build();
-            }
-
-            if (index < 0 || index >= existing.documents.size()) {
-                return ResponseEntity.badRequest().<InputStreamResource>build();
-            }
-
-            String filePath = existing.documents.get(index);
-            try {
-                Path path = Paths.get(filePath);
-                InputStream inputStream = Files.newInputStream(path);
-                return ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=\"" + path.getFileName().toString() + "\"")
-                        .body(new InputStreamResource(inputStream));
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<InputStreamResource>build();
-            }
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    // Updated: Now handles multipart form data (fields + files)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ServiceRequest> submitRequest(
-            @RequestParam("name") String name,
-            @RequestParam("description") String description,
-            @RequestParam("category") String category,
-            @RequestParam("address") String address,
-            @RequestParam(value = "documents", required = false) List<MultipartFile> documents,
+            @RequestPart("name") String name,
+            @RequestPart("description") String description,
+            @RequestPart("category") String category,
+            @RequestPart("address") String address,
+            @RequestPart(value = "documents", required = false) MultipartFile[] files,
             Authentication auth) {
 
-        String ownerId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
+        logger.info("New request submission from user: {}", extractUserId(auth));
 
-        // Create new request object
         ServiceRequest request = new ServiceRequest();
         request.name = name;
         request.description = description;
         request.category = category;
         request.address = address;
-        request.ownerId = ownerId;
-        request.status = "PENDING";
-        request.documents = new ArrayList<>(); // Initialize empty list
+        request.ownerId = extractUserId(auth);
+        request.documents = new ArrayList<>();
+        User owner = (User) auth.getPrincipal();
+        request.municipality = owner.municipality;
+        ServiceRequest saved = repository.save(request);
 
-        // Save request first to get ID
-        ServiceRequest savedRequest = repository.save(request);
-
-        // Handle file uploads if provided
-        if (documents != null && !documents.isEmpty()) {
-            String requestUploadDir = uploadDir + savedRequest.id + "/";
+        if (files != null && files.length > 0) {
+            Path requestDir = Paths.get("./uploads/requests/" + saved.id);
             try {
-                Files.createDirectories(Paths.get(requestUploadDir)); // Create dir if needed
+                Files.createDirectories(requestDir);
+                for (MultipartFile file : files) {
+                    if (file.isEmpty())
+                        continue;
+
+                    String originalName = file.getOriginalFilename();
+                    String fileName = UUID.randomUUID()
+                            + (originalName != null ? "_" + originalName.replaceAll("[^a-zA-Z0-9.-]", "_") : "");
+                    Path filePath = requestDir.resolve(fileName);
+                    file.transferTo(filePath);
+
+                    saved.documents.add(filePath.toString());
+                }
+                saved = repository.save(saved);
             } catch (IOException e) {
+                logger.error("File upload failed: {}", e.getMessage());
+                repository.delete(saved);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-
-            for (MultipartFile file : documents) {
-                if (!file.isEmpty()) {
-                    try {
-                        // Generate unique file name
-                        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                        Path filePath = Paths.get(requestUploadDir + fileName);
-                        Files.copy(file.getInputStream(), filePath);
-
-                        // Add relative path to documents list
-                        savedRequest.documents.add(requestUploadDir + fileName);
-                    } catch (IOException e) {
-                        // Log error, but continue with other files
-                        System.err.println("Failed to save file: " + file.getOriginalFilename());
-                    }
-                }
-            }
-
-            // Save updated request with document paths
-            savedRequest = repository.save(savedRequest);
         }
 
-        // REAL-TIME: Notify via WebSocket
-        messagingTemplate.convertAndSend("/topic/requests", savedRequest);
-
-        return ResponseEntity.ok(savedRequest);
+        messagingTemplate.convertAndSend("/topic/requests", saved);
+        logger.info("Request submitted successfully: ID {}", saved.id);
+        return ResponseEntity.ok(saved);
+    }
+@PutMapping("/admin/{id}")
+public ResponseEntity<ServiceRequest> updateAdmin(@PathVariable String id,
+                                                  @RequestBody Map<String, Object> payload,
+                                                  Authentication auth) {
+    if (!isAdmin(auth)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-    @GetMapping("/admin/pending")
-    public List<ServiceRequest> getPending() {
-        return repository.findByStatus("PENDING");
-    }
+    User admin = (User) auth.getPrincipal();
+    logger.info("Admin {} updating request {}", admin.id, id);
 
-    @PutMapping("/admin/{id}")
-    public ResponseEntity<ServiceRequest> updateRequest(@PathVariable String id, @RequestBody ServiceRequest updated) {
-        return repository.findById(id).map(existing -> {
-            existing.status = updated.status;
-            existing.comments = updated.comments;
-            existing.lat = updated.lat;
-            existing.lng = updated.lng;
-
-            ServiceRequest saved = repository.save(existing);
-
-            // REAL-TIME: Notify everyone that a request changed
-            messagingTemplate.convertAndSend("/topic/requests", saved);
-
-            return ResponseEntity.ok(saved);
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    // NEW: Update Request (Owner Only)
-    @PutMapping("/{id}")
-    public ResponseEntity<ServiceRequest> updateRequestOwner(@PathVariable String id,
-            @RequestBody ServiceRequest updated, Authentication auth) {
-        String currentUserId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
-
-        return repository.findById(id).map(existing -> {
-            // Security Check: Only allow if user is the owner
-            if (!existing.ownerId.equals(currentUserId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).<ServiceRequest>build();
+    return repository.findById(id)
+        .<ResponseEntity<ServiceRequest>>map(request -> {
+            // Check municipality match
+            if (!admin.municipality.equals(request.municipality)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-            // Update fields
-            existing.name = updated.name;
-            existing.description = updated.description;
-            existing.category = updated.category;
-            existing.address = updated.address;
+            // Apply updates from payload
+            if (payload.containsKey("status")) {
+                request.status = (String) payload.get("status").toString().toUpperCase();
+            }
+            if (payload.containsKey("comments")) {
+                request.comments = (String) payload.get("comments");
+            }
+            if (payload.containsKey("lat")) {
+                Object latVal = payload.get("lat");
+                request.lat = (latVal != null && latVal instanceof Number) ? ((Number) latVal).doubleValue() : null;
+            }
+            if (payload.containsKey("lng")) {
+                Object lngVal = payload.get("lng");
+                request.lng = (lngVal != null && lngVal instanceof Number) ? ((Number) lngVal).doubleValue() : null;
+            }
 
-            ServiceRequest saved = repository.save(existing);
+            ServiceRequest updated = repository.save(request);
+            messagingTemplate.convertAndSend("/topic/requests", updated);
+            return ResponseEntity.ok(updated);
+        })
+        .orElseGet(ResponseEntity.notFound()::build);
+}
+    @PutMapping("/{id}/admin")
+    public ResponseEntity<ServiceRequest> updateRequestAdmin(
+            @PathVariable String id,
+            @RequestBody ServiceRequest updated,
+            Authentication auth) {
 
-            // REAL-TIME: Notify everyone that a request changed
-            messagingTemplate.convertAndSend("/topic/requests", saved);
+        if (!isAdmin(auth)) {
+            logger.warn("Non-admin attempted admin update on request {}", id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-            return ResponseEntity.ok(saved);
-        }).orElse(ResponseEntity.notFound().build());
+        logger.info("Admin updating request: {}", id);
+
+        return repository.findById(id)
+                .<ResponseEntity<ServiceRequest>>map(existing -> {
+                    if (updated.status != null) {
+                        if (!"PENDING".equals(existing.status) &&
+                                !"APPROVED".equals(updated.status) &&
+                                !"REJECTED".equals(updated.status)) {
+                            return ResponseEntity.badRequest().build();
+                        }
+                        existing.status = updated.status;
+                    }
+                    if (updated.lat != null)
+                        existing.lat = updated.lat;
+                    if (updated.lng != null)
+                        existing.lng = updated.lng;
+                    if (updated.comments != null)
+                        existing.comments = updated.comments;
+
+                    ServiceRequest saved = repository.save(existing);
+                    messagingTemplate.convertAndSend("/topic/requests", saved);
+
+                    logger.info("Admin update success: Request {} status now {}", id, saved.status);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
     }
 
-    // NEW: Delete Request (Owner Only)
+    @PutMapping("/{id}/owner")
+    public ResponseEntity<ServiceRequest> updateRequestOwner(
+            @PathVariable String id,
+            @RequestBody ServiceRequest updated,
+            Authentication auth) {
+
+        String currentUserId = extractUserId(auth);
+        logger.info("Owner {} updating request: {}", currentUserId, id);
+
+        return repository.findById(id)
+                .<ResponseEntity<ServiceRequest>>map(existing -> {
+                    if (!existing.ownerId.equals(currentUserId)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+                    if (!"PENDING".equals(existing.status)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    if (updated.name != null)
+                        existing.name = updated.name;
+                    if (updated.description != null)
+                        existing.description = updated.description;
+                    if (updated.category != null)
+                        existing.category = updated.category;
+                    if (updated.address != null)
+                        existing.address = updated.address;
+
+                    ServiceRequest saved = repository.save(existing);
+                    messagingTemplate.convertAndSend("/topic/requests", saved);
+
+                    logger.info("Owner update success: Request {}", id);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
+    }
+
+    @PostMapping("/{id}/documents")
+    public ResponseEntity<ServiceRequest> uploadAdditionalDocuments(
+            @PathVariable String id,
+            @RequestParam("documents") MultipartFile[] files,
+            Authentication auth) {
+
+        String currentUserId = extractUserId(auth);
+        logger.info("Owner {} uploading additional documents for request {}", currentUserId, id);
+
+        if (files == null || files.length == 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return repository.findById(id)
+                .<ResponseEntity<ServiceRequest>>map(existing -> {
+                    if (!existing.ownerId.equals(currentUserId)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+                    if ("APPROVED".equals(existing.status)) {
+                        return ResponseEntity.badRequest().build();
+                    }
+
+                    Path requestDir = Paths.get("./uploads/requests/" + id);
+                    try {
+                        Files.createDirectories(requestDir);
+                        for (MultipartFile file : files) {
+                            if (file.isEmpty())
+                                continue;
+
+                            String originalName = file.getOriginalFilename();
+                            String fileName = UUID.randomUUID() +
+                                    (originalName != null ? "_" + originalName.replaceAll("[^a-zA-Z0-9.-]", "_") : "");
+                            Path filePath = requestDir.resolve(fileName);
+                            file.transferTo(filePath);
+
+                            existing.documents.add(filePath.toString());
+                        }
+                        ServiceRequest updated = repository.save(existing);
+                        messagingTemplate.convertAndSend("/topic/requests", updated);
+
+                        logger.info("Documents uploaded successfully for request {}", id);
+                        return ResponseEntity.ok(updated);
+                    } catch (IOException e) {
+                        logger.error("Upload failed: {}", e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                    }
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
+    }
+
+    @GetMapping("/{id}/documents/{index}")
+    public ResponseEntity<InputStreamResource> getDocument(
+            @PathVariable String id,
+            @PathVariable int index,
+            Authentication auth) {
+
+        logger.info("Downloading document {} for request {}", index, id);
+
+        if (auth == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String currentUserId = extractUserId(auth);
+        boolean isAdmin = isAdmin(auth);
+
+        return repository.findById(id)
+                .<ResponseEntity<InputStreamResource>>map(existing -> {
+                    if (!existing.ownerId.equals(currentUserId) && !isAdmin) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    if (index < 0 || index >= existing.documents.size()) {
+                        return ResponseEntity.notFound().build();
+                    }
+
+                    String docPath = existing.documents.get(index);
+                    Path path = Paths.get(docPath);
+
+                    try {
+                        InputStream inputStream = Files.newInputStream(path);
+                        return ResponseEntity.ok()
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                .header(HttpHeaders.CONTENT_DISPOSITION,
+                                        "attachment; filename=\"" + path.getFileName() + "\"")
+                                .body(new InputStreamResource(inputStream));
+                    } catch (IOException e) {
+                        logger.error("File read failed: {}", e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                    }
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
+    }
+
+    @DeleteMapping("/{id}/documents/{index}")
+    public ResponseEntity<ServiceRequest> deleteDocument(
+            @PathVariable String id,
+            @PathVariable int index,
+            Authentication auth) {
+
+        String currentUserId = extractUserId(auth);
+        boolean isAdmin = isAdmin(auth);
+
+        logger.info("Deleting document {} for request {} by {}", index, id,
+                isAdmin ? "admin" : "owner " + currentUserId);
+
+        return repository.findById(id)
+                .<ResponseEntity<ServiceRequest>>map(existing -> {
+                    if (!existing.ownerId.equals(currentUserId) && !isAdmin) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    if (index < 0 || index >= existing.documents.size()) {
+                        return ResponseEntity.notFound().build();
+                    }
+
+                    String docPath = existing.documents.remove(index);
+                    try {
+                        Files.deleteIfExists(Paths.get(docPath));
+                        logger.info("File deleted: {}", docPath);
+                    } catch (IOException e) {
+                        logger.warn("Failed to delete file {}: {}", docPath, e.getMessage());
+                    }
+
+                    ServiceRequest updated = repository.save(existing);
+                    messagingTemplate.convertAndSend("/topic/requests", updated);
+
+                    return ResponseEntity.ok(updated);
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRequest(@PathVariable String id, Authentication auth) {
-        String currentUserId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
+    public ResponseEntity<Void> delete(@PathVariable String id, Authentication auth) {
+        String currentUserId = extractUserId(auth);
 
-        return repository.findById(id).map(existing -> {
-            if (!existing.ownerId.equals(currentUserId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).<Void>build();
-            }
+        logger.info("Owner {} attempting to delete request {}", currentUserId, id);
 
-            repository.delete(existing);
+        return repository.findById(id)
+                .<ResponseEntity<Void>>map(existing -> {
+                    if (!existing.ownerId.equals(currentUserId)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+                    if ("APPROVED".equals(existing.status)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
 
-            // REAL-TIME: Send a special message or the deleted ID so frontend can remove it
-            // We can send a "status: DELETED" object or just the ID wrapped in an object
-            existing.status = "DELETED";
-            messagingTemplate.convertAndSend("/topic/requests", existing);
+                    existing.status = "DELETED";
+                    messagingTemplate.convertAndSend("/topic/requests", existing);
+                    repository.delete(existing);
 
-            return ResponseEntity.ok().<Void>build();
-        }).orElse(ResponseEntity.notFound().build());
+                    logger.info("Request {} deleted by owner {}", id, currentUserId);
+                    return ResponseEntity.noContent().build();
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
+    }
+
+    // ────────────────────────────────────────────────
+    // Helpers
+    // ────────────────────────────────────────────────
+
+    private String extractUserId(Authentication auth) {
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new IllegalStateException("No authenticated user found");
+        }
+        return ((User) auth.getPrincipal()).id;
+    }
+
+    private boolean isAdmin(Authentication auth) {
+        if (auth == null || auth.getPrincipal() == null) {
+            return false;
+        }
+        User user = (User) auth.getPrincipal();
+        return "ADMIN".equals(user.role.name());
     }
 }

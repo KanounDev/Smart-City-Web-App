@@ -4,22 +4,6 @@
     padding: 0 1.5rem;
 }
 
-.back-btn {
-    background: var(--primary-blue);
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 1.5rem;
-    transition: var(--transition);
-}
-
-.back-btn:hover {
-    background: var(--accent-cyan);
-    transform: translateY(-1px);
-}
-
 .shop-header {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -65,24 +49,6 @@
     margin-bottom: 1.2rem;
     border-bottom: 2px solid rgba(0, 123, 255, 0.15);
     padding-bottom: 0.6rem;
-}
-
-.documents ul {
-    list-style: none;
-    padding: 0;
-}
-
-.documents li {
-    margin: 0.8rem 0;
-}
-
-.documents a {
-    color: var(--accent-cyan);
-    text-decoration: none;
-}
-
-.documents a:hover {
-    text-decoration: underline;
 }
 
 .services-list {
@@ -167,6 +133,13 @@
     text-align: center;
     color: #6b7280;
     font-style: italic;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #6b7280;
 }
 
 @media (max-width: 768px) {

@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import com.example.smartcity.model.User;
 
 @Service
 public class JwtService {
@@ -31,26 +32,27 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+    // NEW: Extract municipality from claims
+    public String extractMunicipality(String token) {
+        return extractClaim(token, claims -> claims.get("municipality", String.class));
+    }
+
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
+        return generateToken(new HashMap<>(), userDetails);
+    }
 
-        String authority = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst()
-                .orElse("CITIZEN");
-
-        // Remove "ROLE_" if present
-        if (authority.startsWith("ROLE_")) {
-            authority = authority.substring(5);
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        // NEW: Add role and municipality to claims
+        extraClaims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+        if (((User) userDetails).municipality != null) {
+            extraClaims.put("municipality", ((User) userDetails).municipality);
         }
-
-        claims.put("role", authority); // now "OWNER", "ADMIN", "CITIZEN"
-
+        
         return Jwts.builder()
-                .setClaims(claims)
+                .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

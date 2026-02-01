@@ -1,11 +1,11 @@
+<!-- admin-panel.html -->
 <h2>Admin Panel</h2>
 
-<!-- New: Tabs -->
+<!-- Tabs -->
 <div class="tabs">
     <button [class.active]="activeTab === 'pending'" (click)="setTab('pending')">Pending Requests</button>
     <button [class.active]="activeTab === 'approved'" (click)="setTab('approved')">Approved History</button>
     <button [class.active]="activeTab === 'rejected'" (click)="setTab('rejected')">Rejected History</button>
-    <button [class.active]="activeTab === 'categories'" (click)="setTab('categories')">Manage Categories</button>
 </div>
 
 <!-- Tab Content -->
@@ -18,18 +18,35 @@
         @for (item of pendingRequests; track item.id) {
         <div class="request-card">
             <h3>{{ item.name }}</h3>
+
+            <!-- Added status badge -->
+            <span class="status-badge" [ngClass]="{
+                'status-pending':  item.status === 'PENDING'  || item.status === 'pending',
+                'status-approved': item.status === 'APPROVED' || item.status === 'approved',
+                'status-rejected': item.status === 'REJECTED' || item.status === 'rejected'
+            }">{{ item.status || 'PENDING' }}</span>
+
             <p><strong>Category:</strong> {{ item.category }}</p>
             <p><strong>Description:</strong> {{ item.description }}</p>
             <p><strong>Address:</strong> {{ item.address }}</p>
-            <p><strong>Status:</strong> <span class="status-badge" [class]="getStatusClass(item.status)">{{ item.status }}</span></p>
-            <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
+
+            <!-- Reusing .action-bar styles for inputs -->
+            <div class="action-bar admin-inputs">
+                <input type="number" [(ngModel)]="item.lat" placeholder="Latitude" step="any">
+                <input type="number" [(ngModel)]="item.lng" placeholder="Longitude" step="any">
+                <textarea [(ngModel)]="item.comments" placeholder="Admin comments / rejection reason"></textarea>
+            </div>
 
             <div class="documents-section">
                 <h4>Documents:</h4>
-                @if (item.documents && item.documents.length > 0) {
+                @if (item.documents?.length > 0) {
                 <ul class="file-list">
                     @for (doc of item.documents; track $index) {
-                    <li><a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>{{ getFileName(doc) }}</a></li>
+                    <li>
+                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
+                            {{ getFileName(doc) }}
+                        </a>
+                    </li>
                     }
                 </ul>
                 } @else {
@@ -37,19 +54,21 @@
                 }
             </div>
 
+            <!-- Now using .action-bar + .approve / .reject classes -->
             <div class="action-bar">
-                <input type="text" placeholder="Admin Comments (e.g., request more docs)" #comments>
-                <input type="number" placeholder="Lat" #lat>
-                <input type="number" placeholder="Lng" #lng>
-                <button class="approve" (click)="update(item.id, 'APPROVED', comments.value, lat.valueAsNumber, lng.valueAsNumber)">Approve</button>
-                <button class="reject" (click)="update(item.id, 'REJECTED', comments.value, null, null)">Reject</button>
+                <button class="approve" (click)="updateRequest(item.id, 'APPROVED', item.comments, item.lat, item.lng)">
+                    Approve
+                </button>
+                <button class="reject" (click)="updateRequest(item.id, 'REJECTED', item.comments, null, null)">
+                    Reject
+                </button>
             </div>
         </div>
         }
     </div>
     }
 </div>
-} @if (activeTab === 'approved') {
+} @else if (activeTab === 'approved') {
 <div class="tab-content">
     @if (approvedRequests.length === 0) {
     <p class="no-requests">No approved requests.</p>
@@ -57,21 +76,24 @@
     <div class="requests-list">
         @for (item of approvedRequests; track item.id) {
         <div class="request-card view-only">
-            <!-- Similar to pending, but no actions -->
             <h3>{{ item.name }}</h3>
+            <span class="status-badge status-approved">APPROVED</span>
             <p><strong>Category:</strong> {{ item.category }}</p>
             <p><strong>Description:</strong> {{ item.description }}</p>
             <p><strong>Address:</strong> {{ item.address }}</p>
-            <p><strong>Status:</strong> <span class="status-badge" [class]="getStatusClass(item.status)">{{ item.status }}</span></p>
-            <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
-            <p><strong>Location:</strong> Lat: {{ item.lat }}, Lng: {{ item.lng }}</p>
+            <p><strong>Coordinates:</strong> {{ item.lat ?? '—' }} / {{ item.lng ?? '—' }}</p>
+            <p><strong>Admin comments:</strong> {{ item.comments || 'None' }}</p>
 
             <div class="documents-section">
                 <h4>Documents:</h4>
-                @if (item.documents && item.documents.length > 0) {
+                @if (item.documents?.length > 0) {
                 <ul class="file-list">
                     @for (doc of item.documents; track $index) {
-                    <li><a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>{{ getFileName(doc) }}</a></li>
+                    <li>
+                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
+                            {{ getFileName(doc) }}
+                        </a>
+                    </li>
                     }
                 </ul>
                 } @else {
@@ -83,7 +105,7 @@
     </div>
     }
 </div>
-} @if (activeTab === 'rejected') {
+} @else if (activeTab === 'rejected') {
 <div class="tab-content">
     @if (rejectedRequests.length === 0) {
     <p class="no-requests">No rejected requests.</p>
@@ -91,20 +113,23 @@
     <div class="requests-list">
         @for (item of rejectedRequests; track item.id) {
         <div class="request-card view-only">
-            <!-- Similar to approved -->
             <h3>{{ item.name }}</h3>
+            <span class="status-badge status-rejected">REJECTED</span>
             <p><strong>Category:</strong> {{ item.category }}</p>
             <p><strong>Description:</strong> {{ item.description }}</p>
             <p><strong>Address:</strong> {{ item.address }}</p>
-            <p><strong>Status:</strong> <span class="status-badge" [class]="getStatusClass(item.status)">{{ item.status }}</span></p>
-            <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
+            <p><strong>Admin comments:</strong> {{ item.comments || 'None' }}</p>
 
             <div class="documents-section">
                 <h4>Documents:</h4>
-                @if (item.documents && item.documents.length > 0) {
+                @if (item.documents?.length > 0) {
                 <ul class="file-list">
                     @for (doc of item.documents; track $index) {
-                    <li><a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>{{ getFileName(doc) }}</a></li>
+                    <li>
+                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
+                            {{ getFileName(doc) }}
+                        </a>
+                    </li>
                     }
                 </ul>
                 } @else {
@@ -116,9 +141,8 @@
     </div>
     }
 </div>
-} @if (activeTab === 'categories') {
+} @else if (activeTab === 'categories') {
 <div class="tab-content categories-management">
-    <h3>Manage Categories</h3>
     <div class="add-category">
         <input type="text" [(ngModel)]="newCategory" placeholder="New category name">
         <button (click)="addCategory()">Add</button>
@@ -128,14 +152,14 @@
     <p>No categories yet.</p>
     } @else {
     <ul class="categories-list">
-        @for (cat of categories; track $index) {
+        @for (cat of categories; track cat.id) {
         <li>
-            @if (editingCategoryIndex !== $index) {
-            <span>{{ cat }}</span>
-            <button (click)="editCategory($index)">Edit</button>
-            <button class="delete" (click)="deleteCategory($index)">Delete</button> } @else {
+            @if (editingCategoryId !== cat.id) {
+            <span>{{ cat.name }}</span>
+            <button (click)="editCategory(cat.id, cat.name)">Edit</button>
+            <button class="delete" (click)="deleteCategory(cat.id)">Delete</button> } @else {
             <input type="text" [(ngModel)]="editCategoryValue" placeholder="Edit name">
-            <button (click)="saveCategory($index)">Save</button>
+            <button (click)="saveCategory()">Save</button>
             <button (click)="cancelEdit()">Cancel</button> }
         </li>
         }

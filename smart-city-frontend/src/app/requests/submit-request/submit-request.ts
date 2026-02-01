@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { RequestService } from '../request.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';  // Adjust path if needed
 
 @Component({
   selector: 'app-submit-request',
@@ -12,11 +13,15 @@ import { Router } from '@angular/router';
   styleUrls: ['./submit-request.css']
 })
 export class SubmitRequestComponent {
-  request = { name: '', description: '', category: 'Shop', address: '' };
+  request = { name: '', description: '', category: 'Shop', address: '', municipality: '' };
   selectedFiles: File[] = [];  // New: Array to hold selected files
 
-  constructor(private requestService: RequestService, private router: Router) { }
-
+  constructor(private requestService: RequestService, private router: Router, private authService: AuthService) { }
+  ngOnInit() {
+    this.requestService.getCurrentUser().subscribe(user => {
+      this.request.municipality = user.municipality;
+    });
+  }
   // New: Handle file selection
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -34,22 +39,24 @@ export class SubmitRequestComponent {
     this.selectedFiles.splice(index, 1);
   }
 
+  // In submit-request.ts → change how you call the service
   submit() {
-    // New: Prepare FormData for multipart upload
     const formData = new FormData();
     formData.append('name', this.request.name);
     formData.append('description', this.request.description);
     formData.append('category', this.request.category);
     formData.append('address', this.request.address);
+    formData.append('municipality', this.request.municipality);
 
-    // Append each file
     this.selectedFiles.forEach(file => {
-      formData.append('documents', file);  // 'documents' key – match backend @RequestPart
+      formData.append('documents', file);
     });
 
-    // Call service with FormData
-    this.requestService.submitRequest(formData).subscribe(() => {
-      this.router.navigate(['/my-requests']);
+    // IMPORTANT: Do NOT set Content-Type header here!
+    // Let browser set multipart/form-data + boundary
+    this.requestService.submitRequest(formData).subscribe({
+      next: () => this.router.navigate(['/my-requests']),
+      error: (err) => console.error('Submit failed', err)
     });
   }
 }

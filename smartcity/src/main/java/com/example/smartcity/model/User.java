@@ -16,6 +16,9 @@ public class User implements UserDetails {
     public String username;
     public String password;
     public Role role;
+    
+    // NEW: Municipality field (required for OWNER/ADMIN)
+    public String municipality;  // e.g., "Tunis"
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

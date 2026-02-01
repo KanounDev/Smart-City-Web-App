@@ -1,3 +1,4 @@
+// WebSocketConfig.java
 package com.example.smartcity.config;
 
 import org.springframework.context.annotation.Configuration;

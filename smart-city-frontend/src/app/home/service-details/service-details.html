@@ -1,9 +1,10 @@
-<div class="details-container">
-    <button class="back-btn" (click)="goBack()">
-    ← Back to Map
-  </button>
+<!-- Updated service-details.html with loading state and ngIf checks -->
 
-    <div class="shop-header">
+<div class="details-container" *ngIf="!isLoading; else loadingTemplate">
+    <!-- Added *ngIf for loading -->
+
+    <div class="shop-header" *ngIf="shop.name">
+        <!-- Safeguard if shop is empty -->
         <h1>{{ shop.name }}</h1>
         <p class="category">{{ shop.category }}</p>
         <p class="address"><strong>Address:</strong> {{ shop.address }}</p>
@@ -12,24 +13,6 @@
 
     <!-- Simple tabs simulation with sections -->
     <div class="sections">
-        <!-- Overview -->
-        <section class="section overview">
-            <h2>Overview</h2>
-            @if (shop.documents && shop.documents.length > 0) {
-            <div class="documents">
-                <h3>Supporting Documents / Photos</h3>
-                <ul>
-                    @for (doc of shop.documents; track $index) {
-                    <li>
-                        <a [href]="doc.url" target="_blank">{{ doc.name }}</a>
-                    </li>
-                    }
-                </ul>
-            </div>
-            } @else {
-            <p>No documents available.</p>
-            }
-        </section>
 
         <!-- Services Offered -->
         <section class="section services">
@@ -53,10 +36,18 @@
         <section class="section reviews">
             <h2>Reviews</h2>
 
-            <!-- Review Form (static/disabled) -->
+            <!-- Review Form -->
             <div class="review-form">
-                <textarea placeholder="Write your review..." rows="4" disabled></textarea>
-                <button disabled>Submit Review</button>
+                <select [(ngModel)]="newReview.rating" required>
+                    <option value="" disabled selected>Select rating (1-5)</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <textarea [(ngModel)]="newReview.comment" placeholder="Write your review..." rows="4" required></textarea>
+                <button (click)="submitReview()" [disabled]="!newReview.comment || !newReview.rating">Submit Review</button>
             </div>
 
             @if (reviews.length === 0) {
@@ -66,8 +57,10 @@
                 @for (review of reviews; track $index) {
                 <div class="review-card">
                     <div class="review-header">
-                        <strong>{{ review.user }}</strong>
-                        <span class="date">{{ review.date }}</span>
+                        <strong>{{ review.userId }}</strong>
+                        <!-- Treating userId as username -->
+                        <span class="rating">{{ review.rating }} / 5</span>
+                        <span class="date">{{ review.date | date:'medium' }}</span>
                     </div>
                     <p>{{ review.comment }}</p>
                 </div>
@@ -77,3 +70,9 @@
         </section>
     </div>
 </div>
+
+<ng-template #loadingTemplate>
+    <div class="loading-state">
+        <p>Loading business details...</p>
+    </div>
+</ng-template>

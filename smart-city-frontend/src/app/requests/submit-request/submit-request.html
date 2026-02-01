@@ -5,7 +5,10 @@
         <label>Name:</label>
         <input [(ngModel)]="request.name" name="name" placeholder="Name" required>
     </div>
-
+    <div>
+        <label>Municipality:</label>
+        <input [(ngModel)]="request.municipality" name="municipality" readonly>
+    </div>
     <div>
         <label>Description:</label>
         <input [(ngModel)]="request.description" name="description" placeholder="Description" required>

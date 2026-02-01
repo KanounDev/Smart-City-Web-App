@@ -1,112 +1,91 @@
 <h2>My Requests</h2>
 
-@if (requests.length === 0) {
-<p class="no-requests">No requests found.</p>
-} @else {
-<div class="requests-list">
-    @for (item of requests; track item.id) {
-    <div class="request-card">
+<!-- New: Status Filter -->
+<div>
+    <div class="filters-row">
+        <div class="status-filter">
+            <label>Filter by Status:</label>
+            <select [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+            <option value="">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+        </select>
+        </div>
+    </div>
 
-        @if (editingId !== item.id) {
-        <h3>{{ item.name }}</h3>
-        <p><strong>Category:</strong> {{ item.category }}</p>
-        <p><strong>Description:</strong> {{ item.description }}</p>
-        <p><strong>Address:</strong> {{ item.address }}</p>
-        <p><strong>Status:</strong>
-            <span class="status-badge" [class]="getStatusClass(item.status)">
+    @if (filteredRequests.length === 0) {
+    <p class="no-requests">No requests match the selected filter.</p>
+    } @else {
+    <div class="requests-list">
+        @for (item of filteredRequests; track item.id) {
+        <div class="request-card">
+
+            @if (editingId !== item.id) {
+            <h3>{{ item.name }}</h3>
+            <p><strong>Category:</strong> {{ item.category }}</p>
+            <p><strong>Description:</strong> {{ item.description }}</p>
+            <p><strong>Address:</strong> {{ item.address }}</p>
+            <p><strong>Status:</strong>
+                <span class="status-badge" [class]="getStatusClass(item.status)">
               {{ item.status }}
             </span>
-        </p>
-        <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
+            </p>
+            <p><strong>Comments:</strong> {{ item.comments || 'None' }}</p>
 
-        <div class="documents-section">
-            <h4>Documents:</h4>
+            <!-- Documents section remains unchanged -->
+            <div class="documents-section">
+                <h4>Documents:</h4>
 
-            @if (item.documents && item.documents.length > 0) {
-            <ul class="file-list">
-                @for (doc of item.documents; track $index) {
-                <li>
-                    <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
-                      {{ getFileName(doc) }}
+                @if (item.documents && item.documents.length > 0) {
+                <ul class="file-list">
+                    @for (doc of item.documents; track $index) {
+                    <li>
+                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
+                        {{ getFileName(doc) }}
                     </a> @if (item.status === 'PENDING') {
-                    <button type="button" (click)="deleteFile(item.id, $index)" class="remove-btn">
-                        × Remove
-                      </button> }
-                </li>
+                        <button type="button" (click)="deleteFile(item.id, $index)" class="remove-btn">
+                            × Remove
+                        </button> }
+                    </li>
+                    }
+                </ul>
+                } @else {
+                <p>No documents uploaded.</p>
                 }
-            </ul>
-            } @else {
-            <p>No documents uploaded.</p>
-            }
 
-            <!-- Improved file upload area – only shown when PENDING -->
-            @if (item.status === 'PENDING') {
-            <div class="add-files">
-                <label>Ajouter des documents supplémentaires :</label>
+                <!-- File upload area – only when PENDING -->
+                @if (item.status === 'PENDING') {
+                <div class="add-files">
+                    <label>Ajouter des documents supplémentaires :</label>
 
-                <!-- Custom styled upload button -->
-                <label class="custom-file-upload" for="file-input-{{item.id}}">
-                  Choisir des fichiers
-                </label>
+                    <label class="custom-file-upload" for="file-input-{{item.id}}">
+                Choisir des fichiers
+            </label>
 
-                <!-- Hidden real input -->
-                <input id="file-input-{{item.id}}" type="file" multiple (change)="onAdditionalFilesChange($event, item.id)" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" hidden>
+                    <input id="file-input-{{item.id}}" type="file" multiple (change)="onAdditionalFilesChange($event, item.id)" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" hidden> @let files = additionalFiles[item.id];
 
-                <!-- Safe local alias to avoid TS2532 error -->
-                <!-- Safe version – replace the entire <p class="upload-hint"> block -->
-                @let files = additionalFiles[item.id];
+                    <p class="upload-hint">
+                        @if (files && files.length > 0) { {{ files.length }} fichier(s) sélectionné(s) } @else { Aucun fichier choisi }
+                    </p>
 
-                <p class="upload-hint">
-                    @if (files && files.length > 0) { {{ files.length }} fichier(s) sélectionné(s) } @else { Aucun fichier choisi }
-                </p>
-
-                <!-- Also update the disabled binding to be safe -->
-                <button type="button" (click)="uploadAdditionalFiles(item.id)" [disabled]="!files || files.length === 0" class="upload-action-btn">
-  Téléverser
-</button>
-            </div>
-            }
-        </div>
-
-        <div class="action-buttons">
-            @if (item.status === 'PENDING') {
-            <button class="edit" (click)="startEdit(item)">Edit</button> }
-            <button class="delete" (click)="delete(item.id)">Delete</button>
-        </div>
-        } @else {
-        <!-- Edit form -->
-        <div style="margin-top: 10px;">
-            <div style="margin-bottom: 10px;">
-                <label style="display:block">Name:</label>
-                <input [(ngModel)]="editForm.name" style="width: 100%;">
+                    <button type="button" (click)="uploadAdditionalFiles(item.id)" [disabled]="!files || files.length === 0" class="upload-action-btn">
+                Téléverser
+            </button>
+                </div>
+                }
             </div>
 
-            <div style="margin-bottom: 10px;">
-                <label style="display:block">Category:</label>
-                <select [(ngModel)]="editForm.category" style="width: 100%;">
-                <option>Shop</option>
-                <option>Service</option>
-              </select>
+
+            <div class="action-buttons">
+                @if (item.status === 'PENDING') {
+                <button class="edit" (click)="startEdit(item)">Edit</button> } @if (item.status === 'PENDING' || item.status === 'REJECTED') {
+                <button class="delete" (click)="delete(item.id)">Delete</button> }
             </div>
 
-            <div style="margin-bottom: 10px;">
-                <label style="display:block">Description:</label>
-                <input [(ngModel)]="editForm.description" style="width: 100%;">
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <label style="display:block">Address:</label>
-                <input [(ngModel)]="editForm.address" style="width: 100%;">
-            </div>
-
-            <div style="margin-top: 10px;">
-                <button class="save" (click)="saveEdit()">Save</button>
-                <button class="cancel" (click)="cancelEdit()">Cancel</button>
-            </div>
+            } @else { ... edit form ... }
         </div>
         }
-
     </div>
     }
 </div>
-}
