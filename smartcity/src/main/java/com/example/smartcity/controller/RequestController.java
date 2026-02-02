@@ -4,6 +4,8 @@ import com.example.smartcity.model.ServiceRequest;
 import com.example.smartcity.model.User;
 import com.example.smartcity.repository.RequestRepository;
 import com.example.smartcity.repository.UserRepository;
+import com.example.smartcity.service.NotificationService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 
 /**
@@ -38,6 +41,9 @@ public class RequestController {
     private final RequestRepository repository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public RequestController(RequestRepository repository,
             SimpMessagingTemplate messagingTemplate,
@@ -72,11 +78,13 @@ public class RequestController {
         logger.info("Fetching approved requests for municipality: {}", municipality);
         return repository.findByStatusAndMunicipality("APPROVED", municipality);
     }
+
     @GetMapping("/approved/public")
-public List<ServiceRequest> getApprovedPublic() {
-    logger.info("Public request for approved businesses");
-    return repository.findByStatusAndLatIsNotNullAndLngIsNotNull("APPROVED");
-}
+    public List<ServiceRequest> getApprovedPublic() {
+        logger.info("Public request for approved businesses");
+        return repository.findByStatusAndLatIsNotNullAndLngIsNotNull("APPROVED");
+    }
+
     @GetMapping("/rejected")
     public List<ServiceRequest> getRejected(Authentication auth) {
         User admin = (User) auth.getPrincipal();
@@ -182,46 +190,56 @@ public List<ServiceRequest> getApprovedPublic() {
         logger.info("Request submitted successfully: ID {}", saved.id);
         return ResponseEntity.ok(saved);
     }
-@PutMapping("/admin/{id}")
-public ResponseEntity<ServiceRequest> updateAdmin(@PathVariable String id,
-                                                  @RequestBody Map<String, Object> payload,
-                                                  Authentication auth) {
-    if (!isAdmin(auth)) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+    @PutMapping("/admin/{id}")
+    public ResponseEntity<ServiceRequest> updateAdmin(@PathVariable String id,
+            @RequestBody Map<String, Object> payload,
+            Authentication auth) {
+        if (!isAdmin(auth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        User admin = (User) auth.getPrincipal();
+        logger.info("Admin {} updating request {}", admin.id, id);
+
+        return repository.findById(id)
+                .<ResponseEntity<ServiceRequest>>map(request -> {
+                    // Check municipality match
+                    if (!admin.municipality.equals(request.municipality)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    // Apply updates from payload
+                    if (payload.containsKey("status")) {
+                        request.status = (String) payload.get("status").toString().toUpperCase();
+                    }
+                    if (payload.containsKey("comments")) {
+                        request.comments = (String) payload.get("comments");
+                    }
+                    if (payload.containsKey("lat")) {
+                        Object latVal = payload.get("lat");
+                        request.lat = (latVal != null && latVal instanceof Number) ? ((Number) latVal).doubleValue()
+                                : null;
+                    }
+                    if (payload.containsKey("lng")) {
+                        Object lngVal = payload.get("lng");
+                        request.lng = (lngVal != null && lngVal instanceof Number) ? ((Number) lngVal).doubleValue()
+                                : null;
+                    }
+
+                    ServiceRequest updated = repository.save(request);
+                    messagingTemplate.convertAndSend("/topic/requests", updated);
+                    if ("APPROVED".equals(updated.status)) {
+                        notificationService.createStatusChangeNotification(updated); // notify owner
+                        notificationService.createNewBusinessNotification(updated); // notify citizens in area
+                    } else if ("REJECTED".equals(updated.status)) {
+                        notificationService.createStatusChangeNotification(updated); // notify owner only
+                    }
+                    return ResponseEntity.ok(updated);
+                })
+                .orElseGet(ResponseEntity.notFound()::build);
     }
 
-    User admin = (User) auth.getPrincipal();
-    logger.info("Admin {} updating request {}", admin.id, id);
-
-    return repository.findById(id)
-        .<ResponseEntity<ServiceRequest>>map(request -> {
-            // Check municipality match
-            if (!admin.municipality.equals(request.municipality)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-
-            // Apply updates from payload
-            if (payload.containsKey("status")) {
-                request.status = (String) payload.get("status").toString().toUpperCase();
-            }
-            if (payload.containsKey("comments")) {
-                request.comments = (String) payload.get("comments");
-            }
-            if (payload.containsKey("lat")) {
-                Object latVal = payload.get("lat");
-                request.lat = (latVal != null && latVal instanceof Number) ? ((Number) latVal).doubleValue() : null;
-            }
-            if (payload.containsKey("lng")) {
-                Object lngVal = payload.get("lng");
-                request.lng = (lngVal != null && lngVal instanceof Number) ? ((Number) lngVal).doubleValue() : null;
-            }
-
-            ServiceRequest updated = repository.save(request);
-            messagingTemplate.convertAndSend("/topic/requests", updated);
-            return ResponseEntity.ok(updated);
-        })
-        .orElseGet(ResponseEntity.notFound()::build);
-}
     @PutMapping("/{id}/admin")
     public ResponseEntity<ServiceRequest> updateRequestAdmin(
             @PathVariable String id,
@@ -254,7 +272,12 @@ public ResponseEntity<ServiceRequest> updateAdmin(@PathVariable String id,
 
                     ServiceRequest saved = repository.save(existing);
                     messagingTemplate.convertAndSend("/topic/requests", saved);
-
+                    if ("APPROVED".equals(saved.status)) {
+                        notificationService.createStatusChangeNotification(saved); // notify owner
+                        notificationService.createNewBusinessNotification(saved); // notify citizens in area
+                    } else if ("REJECTED".equals(saved.status)) {
+                        notificationService.createStatusChangeNotification(saved); // notify owner only
+                    }
                     logger.info("Admin update success: Request {} status now {}", id, saved.status);
                     return ResponseEntity.ok(saved);
                 })

@@ -31,7 +31,7 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
 
   private updateSub!: Subscription;
 
- ngOnInit() {
+  ngOnInit() {
     this.loadAllRequests();
     this.loadCategories();
 
@@ -43,45 +43,45 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
     }
   }
 
- loadAllRequests() {
-  console.log('ADMIN PANEL: Starting to load requests...');
+  loadAllRequests() {
+    console.log('ADMIN PANEL: Starting to load requests...');
 
-  forkJoin({
-    pending: this.requestService.getRequestsByStatus('PENDING'),
-    approved: this.requestService.getRequestsByStatus('APPROVED'),
-    rejected: this.requestService.getRequestsByStatus('REJECTED')
-  }).subscribe({
-    next: (results) => {
-      console.log('ADMIN PANEL: Raw results →', results);
+    forkJoin({
+      pending: this.requestService.getRequestsByStatus('PENDING'),
+      approved: this.requestService.getRequestsByStatus('APPROVED'),
+      rejected: this.requestService.getRequestsByStatus('REJECTED')
+    }).subscribe({
+      next: (results) => {
+        console.log('ADMIN PANEL: Raw results →', results);
 
-      // Merge all results into one array (single source of truth)
-      const all = [
-        ...(results.pending   || []),
-        ...(results.approved  || []),
-        ...(results.rejected  || [])
-      ];
+        // Merge all results into one array (single source of truth)
+        const all = [
+          ...(results.pending || []),
+          ...(results.approved || []),
+          ...(results.rejected || [])
+        ];
 
-      // Optional: remove duplicates if any overlap (by id)
-      const uniqueMap = new Map<string, any>();
-      all.forEach(req => uniqueMap.set(req.id, req));
-      this.allRequests = Array.from(uniqueMap.values());
+        // Optional: remove duplicates if any overlap (by id)
+        const uniqueMap = new Map<string, any>();
+        all.forEach(req => uniqueMap.set(req.id, req));
+        this.allRequests = Array.from(uniqueMap.values());
 
-      console.log('ADMIN PANEL: Total unique requests loaded:', this.allRequests.length);
-      console.log('ADMIN PANEL: Pending count (via getter):', this.pendingRequests.length);
+        console.log('ADMIN PANEL: Total unique requests loaded:', this.allRequests.length);
+        console.log('ADMIN PANEL: Pending count (via getter):', this.pendingRequests.length);
 
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      console.error('ADMIN PANEL: Failed to load requests', err);
-      if (err.status === 403) {
-        alert('403 Forbidden - Check if you are really logged in as ADMIN');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('ADMIN PANEL: Failed to load requests', err);
+        if (err.status === 403) {
+          alert('403 Forbidden - Check if you are really logged in as ADMIN');
+        }
+        if (err.status === 0) {
+          alert('Network error - Backend not running?');
+        }
       }
-      if (err.status === 0) {
-        alert('Network error - Backend not running?');
-      }
-    }
-  });
-}
+    });
+  }
 
   loadCategories() {
     this.requestService.getCategories().subscribe({
@@ -172,17 +172,41 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  // Replace the existing updateRequest() method with this updated version
+
   updateRequest(id: string, status: string, comments: string, lat: number | null, lng: number | null) {
     const payload = { status, comments, lat, lng };
 
     this.requestService.updateRequest(id, payload).subscribe({
-      next: () => {
-        // Real-time will handle the update
+      next: (updatedRequest) => {
+        // Real-time should handle the list update, but we can help visually
+        console.log(`Admin updated request ${id} to ${status}`);
+
+        // ────────────────────────────────────────────────
+        // ADD THIS BLOCK: User-friendly confirmation
+        // ────────────────────────────────────────────────
+        let message = '';
+        if (status === 'APPROVED') {
+          message = 'Request approved successfully!\n' +
+            '→ Notification sent to the owner\n' +
+            '→ Citizens in the area (~10 km) notified of the new business';
+        } else if (status === 'REJECTED') {
+          message = 'Request rejected successfully!\n' +
+            '→ Notification sent to the owner';
+        } else {
+          message = `Request updated to ${status}`;
+        }
+
+        alert(message);  // ← temporary – later replace with toast/snackbar
+
+        // Optional: force reload to be 100% sure (can remove once WebSocket is reliable)
+        // this.loadAllRequests();
+
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Update failed', err);
-        alert('Failed to update request.');
+        alert('Failed to update request: ' + (err.error?.message || err.message || 'Unknown error'));
       }
     });
   }
