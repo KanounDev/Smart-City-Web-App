@@ -1,12 +1,13 @@
-// src/main/java/com/example/smartcity/controller/NotificationController.java
 package com.example.smartcity.controller;
 
 import com.example.smartcity.model.Notification;
 import com.example.smartcity.repository.NotificationRepository;
-import com.example.smartcity.model.Notification.NotificationType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,28 +20,56 @@ public class NotificationController {
     @Autowired
     private NotificationRepository repository;
 
-    // Get all relevant notifications for the current user: personal + broadcast
     @GetMapping("/my")
     public List<Notification> getMyNotifications(Authentication auth) {
         String userId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
 
-        // Personal notifications
         List<Notification> personal = repository.findByUserId(userId);
+        List<Notification> broadcast = repository.findByUserIdIsNullAndType(
+                Notification.NotificationType.NEW_BUSINESS_APPROVED);
 
-        // Broadcast notifications (e.g., NEW_BUSINESS_APPROVED)
-        List<Notification> broadcast = repository.findByUserIdIsNullAndType(NotificationType.NEW_BUSINESS_APPROVED);
-
-        // Combine and return (frontend will filter broadcast by distance)
         return Stream.concat(personal.stream(), broadcast.stream())
-                     .collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
-    // Mark as read (for personal only)
+    /**
+     * Mark one notification as read for the current user
+     */
     @PutMapping("/{id}/read")
-    public Notification markAsRead(@PathVariable String id) {
-        return repository.findById(id).map(notif -> {
-            notif.isRead = true;
-            return repository.save(notif);
-        }).orElse(null);
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable String id,
+            Authentication auth) {
+
+        String userId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
+
+        return repository.findById(id)
+                .map(notification -> {
+                    // Security: personal notifications can only be marked by their owner
+                    if (notification.userId != null && !notification.userId.equals(userId)) {
+                        return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+                    }
+
+                    notification.readBy.add(userId);
+                    repository.save(notification);
+                    return new ResponseEntity<Void>(HttpStatus.OK);
+                })
+                .orElse(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * Mark all visible notifications as read (great UX)
+     */
+    @PutMapping("/mark-all-read")
+    public ResponseEntity<Void> markAllAsRead(Authentication auth) {
+        String userId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
+
+        List<Notification> notifications = getMyNotifications(auth);
+
+        for (Notification n : notifications) {
+            n.readBy.add(userId);
+        }
+
+        repository.saveAll(notifications);
+        return ResponseEntity.ok().build();
     }
 }

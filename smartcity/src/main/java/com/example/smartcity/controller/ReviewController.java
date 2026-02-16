@@ -1,7 +1,10 @@
 package com.example.smartcity.controller;
 
 import com.example.smartcity.model.Review;
+import com.example.smartcity.repository.RequestRepository;
 import com.example.smartcity.repository.ReviewRepository;
+import com.example.smartcity.service.NotificationService;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
@@ -14,9 +17,15 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewRepository repo;
+    private final RequestRepository requestRepository; // ← NEW
+    private final NotificationService notificationService; // ← NEW
 
-    public ReviewController(ReviewRepository repo) {
+    public ReviewController(ReviewRepository repo,
+            RequestRepository requestRepository,
+            NotificationService notificationService) {
         this.repo = repo;
+        this.requestRepository = requestRepository;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/business/{businessId}")
@@ -26,10 +35,17 @@ public class ReviewController {
 
     @PostMapping
     public Review add(@RequestBody Review review, Authentication auth) {
-        // Set username from auth (assuming User principal has username)
         com.example.smartcity.model.User user = (com.example.smartcity.model.User) auth.getPrincipal();
-        review.userId = user.username;  // Treat userId as username
+        review.userId = user.username;
         review.date = LocalDateTime.now();
-        return repo.save(review);
+
+        Review saved = repo.save(review);
+
+        // 🔥 Trigger notification to the business OWNER
+        requestRepository.findById(review.businessId).ifPresent(business -> {
+            notificationService.createReviewAddedNotification(business.ownerId, business.name);
+        });
+
+        return saved;
     }
 }

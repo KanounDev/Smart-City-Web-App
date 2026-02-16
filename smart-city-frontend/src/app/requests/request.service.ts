@@ -15,8 +15,10 @@ export class RequestService {
 
   // Connection state tracking
   private connectedSubject = new BehaviorSubject<boolean>(false);
+  private userNotificationsTopic = '';
+  private userNotificationSub: StompSubscription | undefined = undefined;
   public isConnected$ = this.connectedSubject.asObservable();
-
+  private notificationUpdates = new Subject<any>();
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -24,19 +26,43 @@ export class RequestService {
   ) {
     this.initializeWebSocket();
   }
+  setCurrentUser(userId: string) {
+    this.userNotificationsTopic = `/topic/notifications/${userId}`;
+    if (this.connectedSubject.value) {
+      this.subscribeToPersonalNotifications();
+    } else {
+      this.isConnected$.pipe(filter(connected => connected), first())
+        .subscribe(() => this.subscribeToPersonalNotifications());
+    }
+  }
+  private subscribeToPersonalNotifications() {
+    if (this.userNotificationSub) {
+      this.userNotificationSub.unsubscribe();
+    }
+    if (!this.userNotificationsTopic) return;
 
+    this.userNotificationSub = this.subscribeToTopic(
+      this.userNotificationsTopic,
+      (notif: any) => {
+        console.log('[REAL-TIME PERSONAL] Notification reçue :', notif);
+        this.notificationUpdates.next(notif);
+      }
+    );
+  }
   private getHeaders() {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    const token = this.authService.getToken();
+    const token = this.authService.getToken();  // assuming getToken() returns the string from localStorage
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
   }
 
-  // ── Request methods ───────────────────────────────────────────────────────
+  getNotificationUpdates(): Observable<object> {
+    return this.notificationUpdates.asObservable();
+  }
   getCurrentUser(): Observable<any> {
     return this.http.get<any>('http://localhost:8081/api/auth/me', { headers: this.getHeaders() });
   }
@@ -96,17 +122,19 @@ export class RequestService {
     console.log('RequestService: Fetching approved requests from /approved');
     return this.http.get<any[]>(`${this.apiUrl}/approved`, { headers: this.getHeaders() });
   }
-getApprovedPublic(): Observable<any[]> {
-  return this.http.get<any[]>('http://localhost:8081/api/requests/approved/public', { headers: this.getHeaders() });
-}
+  getApprovedPublic(): Observable<any[]> {
+    return this.http.get<any[]>('http://localhost:8081/api/requests/approved/public', { headers: this.getHeaders() });
+  }
   submitRequest(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}`, formData, {
-        headers: this.getHeaders().delete('Content-Type')  // ← Remove Content-Type so browser sets correct one
+      headers: this.getHeaders().delete('Content-Type')  // ← Remove Content-Type so browser sets correct one
     });
-}
+  }
 
   addDocuments(id: string, formData: FormData): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${id}/documents`, formData, { headers: this.getHeaders() });
+    return this.http.post<any>(`${this.apiUrl}/${id}/documents`, formData, {
+      headers: this.getHeaders().delete('Content-Type')   // ← THIS WAS MISSING
+    });
   }
 
   deleteDocument(id: string, index: number): Observable<any> {
@@ -237,12 +265,22 @@ getApprovedPublic(): Observable<any[]> {
         console.log('[STOMP] Connected successfully');
         this.connectedSubject.next(true);
 
-        // Global requests subscription
         this.stompClient?.subscribe('/topic/requests', (message) => {
           if (message.body) {
             const updatedRequest = JSON.parse(message.body);
             this.ngZone.run(() => {
               this.requestUpdates.next(updatedRequest);
+            });
+          }
+        });
+
+        // Pour les broadcast (déjà OK, mais ajoute un log pour debug)
+        this.stompClient?.subscribe('/topic/new-business', (message) => {
+          if (message.body) {
+            const newNotif = JSON.parse(message.body);
+            this.ngZone.run(() => {
+              console.log('[REAL-TIME BROADCAST] Nouvelle entreprise approuvée :', newNotif);
+              this.notificationUpdates.next(newNotif);
             });
           }
         });
@@ -268,5 +306,30 @@ getApprovedPublic(): Observable<any[]> {
       this.connectedSubject.next(false);
       console.log('[STOMP] Disconnected');
     }
+  }
+  // Poll initial notifications (personal + all broadcast – filter in components)
+  getNotifications(): Observable<any[]> {
+    const url = `${this.apiUrl.replace('requests', 'notifications')}/my`;
+    console.log('Fetching notifications from:', url);  // DEBUG
+    return this.http.get<any[]>(url, { headers: this.getHeaders() });
+  }
+
+  // Mark as read (call when user views/clicks a notif)
+  // Mark single notification as read
+  markAsRead(notificationId: string): Observable<any> {
+    return this.http.put<any>(
+      `http://localhost:8081/api/notifications/${notificationId}/read`,
+      {},
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // Mark all notifications as read
+  markAllAsRead(): Observable<any> {
+    return this.http.put<any>(
+      'http://localhost:8081/api/notifications/mark-all-read',
+      {},
+      { headers: this.getHeaders() }
+    );
   }
 }

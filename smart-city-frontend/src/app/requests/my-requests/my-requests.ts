@@ -100,7 +100,8 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
   public uploadAdditionalFiles(requestId: string) {
     if (this.additionalFiles[requestId] && this.additionalFiles[requestId].length > 0) {
       const formData = new FormData();
-      this.additionalFiles[requestId].forEach(file => formData.append('additionalDocuments', file));
+      // Change 'additionalDocuments' to 'documents'
+      this.additionalFiles[requestId].forEach(file => formData.append('documents', file));
 
       this.requestService.addDocuments(requestId, formData).subscribe({
         next: (updatedRequest: any) => {

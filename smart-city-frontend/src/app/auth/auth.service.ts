@@ -55,7 +55,24 @@ export class AuthService {
     this.getRole();  // Triggers extraction if not cached
     return this._municipality;
   }
+  // auth.service.ts
+  getCurrentUser(): any {
+    const token = this.getToken();
+    if (!token) return null;
 
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload;
+    } catch (e) {
+      console.error('JWT decode error:', e);
+      return null;
+    }
+  }
+
+  getCurrentUserId(): string | null {
+    const user = this.getCurrentUser(); // or however you get the full user object
+    return user?.id || null;
+  }
   logout() {
     localStorage.removeItem('token');
     this._role = null;  // reset cache

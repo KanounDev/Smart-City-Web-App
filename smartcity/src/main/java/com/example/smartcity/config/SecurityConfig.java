@@ -47,19 +47,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/requests/approved").permitAll()
                         .requestMatchers("/api/requests/approved/public").permitAll()
-                        // --- FIX START: Allow WebSocket Connection ---
                         .requestMatchers("/ws/**").permitAll()
-                        // --- FIX END ---
-
-                        // New: Category permissions
+                        .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers(GET, "/api/categories").permitAll()
-                        .requestMatchers("/api/requests/pending", "/api/requests/approved", "/api/requests/rejected").hasAuthority("ADMIN")
+                        .requestMatchers("/api/requests/pending", "/api/requests/approved", "/api/requests/rejected")
+                        .hasAuthority("ADMIN")
                         .requestMatchers("/api/categories/**").hasAuthority("ADMIN")
-                        .requestMatchers(GET, "/api/requests/{id}").permitAll() // single business by ID
-                        .requestMatchers(GET, "/api/services/business/**").permitAll() // services of any business
+                        .requestMatchers(GET, "/api/requests/{id}").permitAll()
+                        .requestMatchers("/api/requests/*/documents/**").hasAnyAuthority("OWNER", "ADMIN")
+                        .requestMatchers(GET, "/api/services/business/**").permitAll()
                         .requestMatchers(GET, "/api/reviews/business/**").permitAll()
                         .requestMatchers("/api/requests/my").hasAuthority("OWNER")
-                        // Update this line in SecurityConfig.java
                         .requestMatchers("/api/requests").hasAnyAuthority("OWNER", "ADMIN", "CITIZEN")
                         .requestMatchers("/api/requests/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())

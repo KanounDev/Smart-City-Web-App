@@ -1,4 +1,3 @@
-// src/main/java/com/example/smartcity/service/NotificationService.java
 package com.example.smartcity.service;
 
 import com.example.smartcity.model.Notification;
@@ -17,7 +16,7 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // Create personal notification for owner on status change (approve/reject)
+    // 🔥 UPDATED: Matches sample project 99%
     public void createStatusChangeNotification(ServiceRequest request) {
         Notification notif = new Notification();
         notif.userId = request.ownerId;
@@ -27,32 +26,70 @@ public class NotificationService {
         notif.relatedId = request.id;
         notif.relatedType = "ServiceRequest";
         notif.municipality = request.municipality;
-        // No lat/lng for personal status change
+
         notificationRepository.save(notif);
 
-        // Broadcast to owner's personal topic
-        messagingTemplate.convertAndSendToUser(notif.userId, "/notifications", notif);
+        // Exact same push as in the sample project
+        messagingTemplate.convertAndSend("/topic/notifications/" + notif.userId, notif);
     }
 
-    // Create broadcast notification for citizens on approval
+    // Broadcast stays unchanged (already perfect)
     public void createNewBusinessNotification(ServiceRequest request) {
-        if (!"APPROVED".equals(request.status)) {
-            return;  // Only for approvals
-        }
+        if (!"APPROVED".equals(request.status))
+            return;
 
         Notification notif = new Notification();
-        notif.userId = null;  // Broadcast: no specific user
+        notif.userId = null;
         notif.type = Notification.NotificationType.NEW_BUSINESS_APPROVED;
         notif.title = "New Business Approved";
-        notif.message = "A new " + request.category.toLowerCase() + " '" + request.name + "' has been approved in your area.";
+        notif.message = "A new " + request.category.toLowerCase() + " '" + request.name
+                + "' has been approved in your area.";
         notif.relatedId = request.id;
         notif.relatedType = "ServiceRequest";
         notif.municipality = request.municipality;
-        notif.lat = request.lat;  // From admin-set location
-        notif.lng = request.lng;  // From admin-set location
+        notif.lat = request.lat;
+        notif.lng = request.lng;
+
+        notificationRepository.save(notif);
+        messagingTemplate.convertAndSend("/topic/new-business", notif);
+    }
+
+    // Add this method to the existing NotificationService class
+    // Updated method - works for both directions
+    public void createNewMessageNotification(String recipientUserId, String senderName, String messagePreview) {
+        Notification notif = new Notification();
+        notif.userId = recipientUserId;
+        notif.type = Notification.NotificationType.NEW_MESSAGE;
+        notif.title = "New Message";
+
+        // More natural text depending on who receives it
+        notif.message = "New message from " + senderName + ": " + messagePreview;
+
+        notif.relatedId = recipientUserId; // conversation ID = ownerId
+        notif.relatedType = "Conversation";
+        notif.municipality = null;
+
         notificationRepository.save(notif);
 
-        // Broadcast to public topic for area notifications
-        messagingTemplate.convertAndSend("/topic/new-business", notif);
+        // 🔥 Same push as the original sample project
+        messagingTemplate.convertAndSend("/topic/notifications/" + recipientUserId, notif);
+    }
+
+    // NEW: Review notification for owner (matches the exact style of the sample
+    // project)
+    public void createReviewAddedNotification(String ownerId, String businessName) {
+        Notification notif = new Notification();
+        notif.userId = ownerId;
+        notif.type = Notification.NotificationType.REVIEW_ADDED;
+        notif.title = "New Review Added";
+        notif.message = "A new review was added for " + businessName;
+        notif.relatedId = null; // we can link to businessId later if you want
+        notif.relatedType = "Review";
+        notif.municipality = null;
+
+        notificationRepository.save(notif);
+
+        // 🔥 Exact same real-time push as the original sample project
+        messagingTemplate.convertAndSend("/topic/notifications/" + ownerId, notif);
     }
 }
