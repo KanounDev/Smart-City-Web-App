@@ -134,7 +134,7 @@ Before you begin, ensure you have the following installed:
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/yourusername/smart-city-platform.git
+git clone https://github.com/KanounDev/Smart-City-Web-App.git
 cd smart-city-platform
 ```
 
