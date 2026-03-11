@@ -41,33 +41,94 @@ The Smart City Platform addresses the need for a centralized digital solution to
 - Request additional documents or clarifications
 - Approve or reject applications digitally
 - Manually position approved services on the city map (ensuring accuracy)
-- Manage categories and service types
 
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Java 17**
-- **Spring Boot 3.x**
-- **Spring Security** with JWT authentication
-- **MongoDB** for flexible data schemas
-- **Maven** for dependency management
+- **Spring Boot**
+- **MongoDB**
 
 ### Frontend
-- **Angular 17+**
+- **Angular**
 - **TypeScript**
-- **Leaflet/OpenStreetMap** for map visualization
-- **Bootstrap** for responsive design
-- **RxJS** for reactive programming
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have installed:
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
-- **npm** (v9 or higher) - Comes with Node.js
-- **Java JDK 17** - [Download](https://adoptium.net/)
-- **Maven** (v3.8 or higher) - [Download](https://maven.apache.org/)
-- **MongoDB** (v6 or higher) - [Download](https://www.mongodb.com/try/download/community)
-- **Git** - [Download](https://git-scm.com/)
+Before you begin, ensure you have the following installed:
+
+### Backend Requirements
+- **Java JDK 17** (or higher)
+  - Download from [Adoptium](https://adoptium.net/) or [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html)
+  - Verify installation: `java -version`
+  
+- **Maven** (v3.8 or higher)
+  - Download from [Apache Maven](https://maven.apache.org/download.cgi)
+  - Installation guide: [Maven Installation Instructions](https://maven.apache.org/install.html)
+  - Verify installation: `mvn -version`
+
+- **MongoDB** (v6 or higher)
+  - Download from [MongoDB Community Server](https://www.mongodb.com/try/download/community)
+  - Installation guides:
+    - [Windows Installation](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
+    - [macOS Installation](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/)
+    - [Linux Installation](https://docs.mongodb.com/manual/administration/install-on-linux/)
+  - Verify installation: `mongod --version`
+  - Ensure MongoDB service is running:
+    ```bash
+    # On Linux/macOS
+    sudo systemctl start mongod
+    # or
+    mongod
+    
+    # On Windows (Run as Administrator)
+    net start MongoDB
+    ```
+
+### Frontend Requirements
+- **Node.js** (v18 or higher)
+  - Download from [Node.js Official Website](https://nodejs.org/)
+  - Includes npm (Node Package Manager)
+  - Verify installation:
+    ```bash
+    node --version
+    npm --version
+    ```
+
+- **Angular CLI** (v17 or higher)
+  - Install globally via npm:
+    ```bash
+    npm install -g @angular/cli
+    ```
+  - Verify installation:
+    ```bash
+    ng version
+    ```
+
+### Version Control
+- **Git**
+  - Download from [Git Official Website](https://git-scm.com/downloads)
+  - Installation guides: [Git Setup Instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+  - Verify installation:
+    ```bash
+    git --version
+    ```
+
+### Optional but Recommended
+- **Postman** or **Insomnia** - For API testing
+  - [Download Postman](https://www.postman.com/downloads/)
+  - [Download Insomnia](https://insomnia.rest/download/)
+
+- **MongoDB Compass** - GUI for MongoDB
+  - [Download MongoDB Compass](https://www.mongodb.com/products/compass)
+
+- **Visual Studio Code** - Recommended IDE
+  - [Download VS Code](https://code.visualstudio.com/)
+  - Recommended extensions:
+    - Angular Language Service
+    - Java Extension Pack
+    - Spring Boot Extension Pack
+    - MongoDB for VS Code
+    - Prettier - Code formatter
 
 ## 🚀 Installation
 
@@ -87,7 +148,7 @@ cd smartcity
 2. **Configure MongoDB:**
    - Ensure MongoDB is running locally
    - Default connection: `mongodb://localhost:27017`
-   - The application will automatically create the `smart_city_db` database
+   - Create the `smart_city_db` database
 
 3. **Configure application properties:**
    
@@ -103,13 +164,12 @@ cd smartcity
 
 4. **Build the project:**
 ```bash
-./mvnw clean install
+mvn clean install
 ```
-   - On Windows, use `mvnw.cmd clean install`
 
 5. **Run the backend:**
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
    The backend will start at `http://localhost:8081`
 
@@ -125,17 +185,7 @@ cd smart-city-frontend
 npm install
 ```
 
-3. **Configure environment (if needed):**
-   
-   Edit `src/environments/environment.ts`:
-   ```typescript
-   export const environment = {
-     production: false,
-     apiUrl: 'http://localhost:8081/api'
-   };
-   ```
-
-4. **Run the frontend:**
+3. **Run the frontend:**
 ```bash
 ng serve
 ```
@@ -160,7 +210,7 @@ ng serve
 2. **Start the Backend:**
    ```bash
    cd smartcity
-   ./mvnw spring-boot:run
+   mvn spring-boot:run
    ```
 
 3. **Start the Frontend:**
