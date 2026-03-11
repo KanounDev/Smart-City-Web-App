@@ -18,14 +18,11 @@
         @for (item of pendingRequests; track item.id) {
         <div class="request-card">
             <h3>{{ item.name }}</h3>
-
-            <!-- Added status badge -->
             <span class="status-badge" [ngClass]="{
                 'status-pending':  item.status === 'PENDING'  || item.status === 'pending',
                 'status-approved': item.status === 'APPROVED' || item.status === 'approved',
                 'status-rejected': item.status === 'REJECTED' || item.status === 'rejected'
             }">{{ item.status || 'PENDING' }}</span>
-
             <p><strong>Category:</strong> {{ item.category }}</p>
             <p><strong>Description:</strong> {{ item.description }}</p>
             <p><strong>Address:</strong> {{ item.address }}</p>
@@ -43,9 +40,9 @@
                 <ul class="file-list">
                     @for (doc of item.documents; track $index) {
                     <li>
-                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
-                            {{ getFileName(doc) }}
-                        </a>
+                        <a href="#" (click)="downloadDocument(item.id, $index); $event.preventDefault()">
+    {{ getFileName(doc) }}
+</a>
                     </li>
                     }
                 </ul>
@@ -90,9 +87,9 @@
                 <ul class="file-list">
                     @for (doc of item.documents; track $index) {
                     <li>
-                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
-                            {{ getFileName(doc) }}
-                        </a>
+                        <a href="#" (click)="downloadDocument(item.id, $index); $event.preventDefault()">
+    {{ getFileName(doc) }}
+</a>
                     </li>
                     }
                 </ul>
@@ -126,9 +123,9 @@
                 <ul class="file-list">
                     @for (doc of item.documents; track $index) {
                     <li>
-                        <a [href]="getDownloadUrl(item.id, $index)" target="_blank" download>
-                            {{ getFileName(doc) }}
-                        </a>
+                        <a href="#" (click)="downloadDocument(item.id, $index); $event.preventDefault()">
+    {{ getFileName(doc) }}
+</a>
                     </li>
                     }
                 </ul>
@@ -139,31 +136,6 @@
         </div>
         }
     </div>
-    }
-</div>
-} @else if (activeTab === 'categories') {
-<div class="tab-content categories-management">
-    <div class="add-category">
-        <input type="text" [(ngModel)]="newCategory" placeholder="New category name">
-        <button (click)="addCategory()">Add</button>
-    </div>
-
-    @if (categories.length === 0) {
-    <p>No categories yet.</p>
-    } @else {
-    <ul class="categories-list">
-        @for (cat of categories; track cat.id) {
-        <li>
-            @if (editingCategoryId !== cat.id) {
-            <span>{{ cat.name }}</span>
-            <button (click)="editCategory(cat.id, cat.name)">Edit</button>
-            <button class="delete" (click)="deleteCategory(cat.id)">Delete</button> } @else {
-            <input type="text" [(ngModel)]="editCategoryValue" placeholder="Edit name">
-            <button (click)="saveCategory()">Save</button>
-            <button (click)="cancelEdit()">Cancel</button> }
-        </li>
-        }
-    </ul>
     }
 </div>
 }

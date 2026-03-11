@@ -116,12 +116,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   userLng: number | null = null;
   showNotifications = false;
   notifications: any[] = [];
+  notificationSound = new Audio('assets/sounds/notification.mp3');
+
   clearAll() {
     this.notifications = [];
   }
   unreadCount = 0;
   showDropdown = false;
-
   toggleNotifications() {
     this.showNotifications = !this.showNotifications;
 
@@ -191,7 +192,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         if (existingIndex !== -1) {
           this.notifications[existingIndex] = { ...this.notifications[existingIndex], ...processedNotif };
         } else {
-          this.notifications.unshift(processedNotif);
+          this.notifications.push(processedNotif);
+          this.notificationSound.currentTime = 0;
+          this.notificationSound.play().catch(err => console.warn('Sound blocked:', err));
+          this.notifications.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         }
 
         this.updateUnreadCount();
@@ -244,10 +250,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (rawNotifs: any[]) => {
         console.log('Raw notifications from server:', rawNotifs);
 
-        this.notifications = this.filterRelevantNotifications(rawNotifs).map(notif => ({
-          ...notif,
-          isRead: notif.readBy?.includes(this.currentUserId!) ?? false
-        }));
+        this.notifications = this.filterRelevantNotifications(rawNotifs)
+          .map(notif => ({
+            ...notif,
+            isRead: notif.readBy?.includes(this.currentUserId!) ?? false
+          }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         console.log('Processed notifications:', this.notifications);
         this.updateUnreadCount();

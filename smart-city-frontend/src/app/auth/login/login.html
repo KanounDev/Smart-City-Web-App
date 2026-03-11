@@ -5,7 +5,6 @@
 
         <input type="password" placeholder="Password" [(ngModel)]="user.password" name="password" required>
 
-        <!-- NEW: Role selector to show/hide municipality -->
         <select [(ngModel)]="user.role" name="role" (change)="updateForm()">
             <option value="CITIZEN">Citizen</option>
             <option value="OWNER">Business Owner</option>

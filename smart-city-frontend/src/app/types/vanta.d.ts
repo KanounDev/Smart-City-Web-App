@@ -1,4 +1,3 @@
-// This tells TypeScript that any import from 'vanta/*' is valid and returns a function
 declare module 'vanta/dist/vanta.*' {
   type VantaEffect = {
     destroy: () => void;

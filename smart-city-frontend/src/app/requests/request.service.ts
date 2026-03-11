@@ -1,4 +1,3 @@
-// request.service.ts
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
@@ -13,7 +12,6 @@ export class RequestService {
   private stompClient: Client | null = null;
   private requestUpdates = new Subject<any>();
 
-  // Connection state tracking
   private connectedSubject = new BehaviorSubject<boolean>(false);
   private userNotificationsTopic = '';
   private userNotificationSub: StompSubscription | undefined = undefined;
@@ -53,7 +51,7 @@ export class RequestService {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    const token = this.authService.getToken();  // assuming getToken() returns the string from localStorage
+    const token = this.authService.getToken();  
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
@@ -70,7 +68,33 @@ export class RequestService {
   getAllOwners(): Observable<any[]> {
     return this.http.get<any[]>('http://localhost:8081/api/conversations', { headers: this.getHeaders() });
   }
+ 
+  downloadDocument(requestId: string, index: number): void {
+    const url = `${this.getApiBaseUrl()}/${requestId}/documents/${index}`;
 
+    this.http.get(url, {
+      responseType: 'blob' as const,
+      headers: this.getHeaders()   // ← JWT required (already fixed in previous step)
+    }).subscribe({
+      next: (blob: Blob) => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const newTab = window.open(blobUrl, '_blank');
+
+        // Auto-cleanup memory after 15 seconds (safe for new tab)
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+        }, 15000);
+      },
+      error: (err) => {
+        console.error('Document open failed', err);
+        if (err.status === 403) {
+          alert('Accès refusé – Vous n\'êtes pas autorisé à ouvrir ce document.');
+        } else {
+          alert('Erreur lors de l\'ouverture du document');
+        }
+      }
+    });
+  }
   getConversation(ownerId: string): Observable<any> {
     return this.http.get<any>(`http://localhost:8081/api/conversations/${ownerId}`, { headers: this.getHeaders() });
   }
@@ -127,13 +151,13 @@ export class RequestService {
   }
   submitRequest(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}`, formData, {
-      headers: this.getHeaders().delete('Content-Type')  // ← Remove Content-Type so browser sets correct one
+      headers: this.getHeaders().delete('Content-Type')  
     });
   }
 
   addDocuments(id: string, formData: FormData): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${id}/documents`, formData, {
-      headers: this.getHeaders().delete('Content-Type')   // ← THIS WAS MISSING
+      headers: this.getHeaders().delete('Content-Type') 
     });
   }
 
@@ -172,7 +196,6 @@ export class RequestService {
   addReview(review: any): Observable<any> {
     return this.http.post<any>(`http://localhost:8081/api/reviews`, review, { headers: this.getHeaders() });
   }
-  // ── NEW: Service methods ─────────────────────────────────────────────────────
   getServicesByBusinessId(businessId: string): Observable<any[]> {
     return this.http.get<any[]>(`http://localhost:8081/api/services/business/${businessId}`, {
       headers: this.getHeaders()
@@ -196,25 +219,6 @@ export class RequestService {
       headers: this.getHeaders()
     });
   }
-
-  // ── Category methods ───────────────────────────────────────────────────────
-  getCategories(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8081/api/categories', { headers: this.getHeaders() });
-  }
-
-  addCategory(category: any): Observable<any> {
-    return this.http.post<any>('http://localhost:8081/api/categories', category, { headers: this.getHeaders() });
-  }
-
-  updateCategory(id: string, category: any): Observable<any> {
-    return this.http.put<any>(`http://localhost:8081/api/categories/${id}`, category, { headers: this.getHeaders() });
-  }
-
-  deleteCategory(id: string): Observable<any> {
-    return this.http.delete<any>(`http://localhost:8081/api/categories/${id}`, { headers: this.getHeaders() });
-  }
-
-  // ── WebSocket methods ───────────────────────────────────────────────────────
   subscribeToTopic(topic: string, callback: (message: any) => void): StompSubscription | undefined {
     if (!this.stompClient) {
       console.warn('[RequestService] STOMP client not initialized');
@@ -274,7 +278,6 @@ export class RequestService {
           }
         });
 
-        // Pour les broadcast (déjà OK, mais ajoute un log pour debug)
         this.stompClient?.subscribe('/topic/new-business', (message) => {
           if (message.body) {
             const newNotif = JSON.parse(message.body);
@@ -307,15 +310,12 @@ export class RequestService {
       console.log('[STOMP] Disconnected');
     }
   }
-  // Poll initial notifications (personal + all broadcast – filter in components)
   getNotifications(): Observable<any[]> {
     const url = `${this.apiUrl.replace('requests', 'notifications')}/my`;
     console.log('Fetching notifications from:', url);  // DEBUG
     return this.http.get<any[]>(url, { headers: this.getHeaders() });
   }
 
-  // Mark as read (call when user views/clicks a notif)
-  // Mark single notification as read
   markAsRead(notificationId: string): Observable<any> {
     return this.http.put<any>(
       `http://localhost:8081/api/notifications/${notificationId}/read`,
@@ -324,7 +324,6 @@ export class RequestService {
     );
   }
 
-  // Mark all notifications as read
   markAllAsRead(): Observable<any> {
     return this.http.put<any>(
       'http://localhost:8081/api/notifications/mark-all-read',

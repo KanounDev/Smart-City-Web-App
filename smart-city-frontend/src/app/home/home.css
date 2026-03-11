@@ -15,25 +15,21 @@ h1 {
     margin: 0 auto;
     padding: 0 1.5rem 2rem;
     min-height: 70vh;
-    /* give some breathing room */
 }
 
 .list-column {
     flex: 1 1 38%;
-    /* list takes ~38% width */
     max-width: 420px;
 }
 
 .map-column {
     flex: 1 1 62%;
-    /* map takes more space */
     display: flex;
     flex-direction: column;
 }
 
 .map-container {
     flex: 1;
-    /* map grows to fill available height */
     min-height: 500px;
     height: 100%;
     border-radius: 16px;
@@ -42,7 +38,6 @@ h1 {
     border: 1px solid rgba(0, 123, 255, 0.12);
     transition: var(--transition);
     background: #f8fcff;
-    /* subtle bg if map loads slowly */
 }
 
 .map-container:hover {
@@ -50,26 +45,17 @@ h1 {
     transform: translateY(-4px);
 }
 
-
-/* Scrollable list container */
-
 .list-container {
     background: #ffffff;
     border-radius: 16px;
     box-shadow: var(--card-shadow);
     padding: 1.5rem;
     max-height: 70vh;
-    /* ← key: controls scroll height */
     overflow-y: auto;
-    /* only vertical scroll when needed */
     border: 1px solid rgba(0, 123, 255, 0.1);
     scrollbar-width: thin;
-    /* firefox */
     scrollbar-color: var(--accent-cyan) #f1f5f9;
 }
-
-
-/* For WebKit browsers (Chrome, Safari, Edge) */
 
 .list-container::-webkit-scrollbar {
     width: 8px;
@@ -88,9 +74,6 @@ h1 {
 .list-container::-webkit-scrollbar-thumb:hover {
     background: #0099cc;
 }
-
-
-/* Individual service cards */
 
 .service-card {
     background: #fafcff;
@@ -124,9 +107,6 @@ h1 {
     color: var(--primary-blue);
 }
 
-
-/* Empty state */
-
 .empty-state {
     background: #ffffff;
     border-radius: 16px;
@@ -136,11 +116,6 @@ h1 {
     color: #6b7280;
     font-size: 1.15rem;
 }
-
-
-/* ────────────────────────────────────────────────
-   Responsive: stack on smaller screens
-───────────────────────────────────────────────── */
 
 @media (max-width: 992px) {
     .content-wrapper {
@@ -153,7 +128,6 @@ h1 {
     }
     .list-container {
         max-height: 50vh;
-        /* smaller on mobile */
     }
     .map-container {
         min-height: 420px;
@@ -168,12 +142,6 @@ h1 {
         min-height: 360px;
     }
 }
-
-
-/* Existing styles remain unchanged */
-
-
-/* New: Filters row styles */
 
 .filters-row {
     display: flex;
@@ -191,7 +159,6 @@ h1 {
     max-width: 400px;
     display: flex;
     align-items: center;
-    /* keeps icon and input vertically aligned */
     background: #f8f9fa;
     border: 1px solid rgba(0, 123, 255, 0.2);
     border-radius: 10px;
@@ -210,7 +177,6 @@ h1 {
     font-size: 1.3rem;
     pointer-events: none;
     line-height: 1;
-    /* helps icon centering */
 }
 
 .search-container input {
@@ -218,23 +184,16 @@ h1 {
     border: none;
     background: transparent;
     padding: 0 12px 0 0;
-    /* no left padding anymore (icon takes space) */
     font-size: 1rem;
     outline: none;
     height: 44px;
-    /* fixed height is important here */
     line-height: 44px;
-    /* ← this is the key: matches height → vertical center */
     color: var(--text-dark);
 }
-
-
-/* Optional: Make placeholder look good too */
 
 .search-container input::placeholder {
     color: #9ca3af;
     opacity: 1;
-    /* some browsers fade placeholder */
 }
 
 .category-filter {
@@ -258,9 +217,6 @@ h1 {
     outline: none;
 }
 
-
-/* Responsive: Stack on small screens */
-
 @media (max-width: 600px) {
     .filters-row {
         flex-direction: column;
@@ -273,13 +229,6 @@ h1 {
     }
 }
 
-
-/* Updated empty-state for filters */
-
 .empty-state p {
     font-size: 1.15rem;
-    /* Matches existing */
 }
-
-
-/* ... existing styles unchanged ... */

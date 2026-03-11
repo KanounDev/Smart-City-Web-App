@@ -1,6 +1,4 @@
-// Updated service-details.ts with change detection and extra safeguards
-
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';  // Added ChangeDetectorRef
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -34,13 +32,13 @@ export class ServiceDetailsComponent implements OnInit {
   reviews: Review[] = [];
   newReview: { comment: string; rating: number } = { comment: '', rating: 0 };
   businessId: string = '';
-  isLoading = true;  // Added loading flag for UI feedback
+  isLoading = true;  
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private requestService: RequestService,
-    private cdr: ChangeDetectorRef  // Added for manual change detection
+    private cdr: ChangeDetectorRef  
   ) { }
 
   ngOnInit() {
@@ -50,12 +48,11 @@ export class ServiceDetailsComponent implements OnInit {
       return;
     }
 
-    // Fetch business details
     this.requestService.getBusinessById(this.businessId).subscribe({
       next: (data) => {
         console.log('Loaded business data:', data);
         this.shop = data || {};
-        this.cdr.detectChanges();  // Trigger UI update
+        this.cdr.detectChanges();  
       },
       error: (err) => {
         console.error('Failed to load business:', err);
@@ -66,12 +63,11 @@ export class ServiceDetailsComponent implements OnInit {
       }
     });
 
-    // Fetch services
     this.requestService.getServicesByBusinessId(this.businessId).subscribe({
       next: (data) => {
         console.log('Loaded services data:', data);
         this.services = data || [];
-        this.cdr.detectChanges();  // Trigger UI update
+        this.cdr.detectChanges();  
       },
       error: (err) => console.error('Failed to load services:', err),
       complete: () => {
@@ -79,12 +75,11 @@ export class ServiceDetailsComponent implements OnInit {
       }
     });
 
-    // Fetch reviews
     this.requestService.getReviewsByBusinessId(this.businessId).subscribe({
       next: (data) => {
         console.log('Loaded reviews data:', data);
         this.reviews = data || [];
-        this.cdr.detectChanges();  // Trigger UI update
+        this.cdr.detectChanges(); 
       },
       error: (err) => console.error('Failed to load reviews:', err),
       complete: () => {
@@ -93,9 +88,7 @@ export class ServiceDetailsComponent implements OnInit {
     });
   }
 
-  // Helper to check if all data is loaded
   private checkLoadingComplete() {
-    // Simple check — could be more precise with counters
     if (this.shop.id && this.services && this.reviews) {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -118,7 +111,7 @@ export class ServiceDetailsComponent implements OnInit {
       next: (savedReview) => {
         this.reviews.push(savedReview);
         this.newReview = { comment: '', rating: 0 };
-        this.cdr.detectChanges();  // Update UI after adding review
+        this.cdr.detectChanges();  
       },
       error: (err) => {
         console.error('Failed to submit review:', err);

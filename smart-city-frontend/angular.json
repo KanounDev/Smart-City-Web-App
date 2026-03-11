@@ -21,12 +21,12 @@
                         "assets": [{
                             "glob": "**/*",
                             "input": "public"
-                        }],
+                        }, "src/favicon.ico", "src/assets"],
                         "styles": [
-                          "src/material-theme.scss",
-                          "src/styles.css",
-                          "src/app/app.css",
-                          "node_modules/leaflet/dist/leaflet.css"
+                            "src/material-theme.scss",
+                            "src/styles.css",
+                            "src/app/app.css",
+                            "node_modules/leaflet/dist/leaflet.css"
                         ]
                     },
                     "configurations": {

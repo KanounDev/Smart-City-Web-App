@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
-import { latLng, tileLayer, marker, Layer, Map as LeafletMap, Icon, icon, Marker } from 'leaflet'; // Added Marker
+import { latLng, tileLayer, marker, Layer, Map as LeafletMap, Icon, icon, Marker } from 'leaflet'; 
 import { RequestService } from '../requests/request.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -19,7 +19,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   approved: any[] = [];
-  categories: any[] = [];
   layers: Layer[] = [];
   options = {
     layers: [
@@ -29,18 +28,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
     ],
     zoom: 12,
-    center: latLng(36.8065, 10.1815) // Tunis coordinates
+    center: latLng(36.8065, 10.1815) 
   };
   searchQuery: string = '';
   selectedCategory: string = '';
   private updateSub!: Subscription;
   private map!: LeafletMap;
 
-  // NEW: User location and error handling
   userLocation: { lat: number; lng: number } | null = null;
   locationError: string | null = null;
 
-  // 1. Fix the icons globally
   private fixLeafletIcons() {
     const defaultIcon = icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -53,11 +50,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       shadowSize: [41, 41]
     });
 
-    // Set this as the default for all markers
     Marker.prototype.options.icon = defaultIcon;
   }
 
-  // Define a special icon for the User/Visitor
   private visitorIcon = icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -71,9 +66,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
-    this.fixLeafletIcons(); // Call the fix on init
-    this.loadCategories();
-    this.getUserLocation(); // NEW: Get location first
+    this.fixLeafletIcons(); 
+    this.getUserLocation(); 
 
     if (this.requestService.getUpdates) {
       this.updateSub = this.requestService.getUpdates().subscribe((updatedItem: any) => {
@@ -82,8 +76,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     }
   }
-
-  // NEW: Get user location
   private getUserLocation() {
     if (!navigator.geolocation) {
       this.locationError = 'Geolocation is not supported by your browser.';
@@ -103,22 +95,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       (error) => {
         console.error('Geolocation error:', error);
         this.locationError = 'Unable to access your location. Showing all approved businesses.';
-        this.loadApprovedRequests(); // Fallback: load without distance filter
+        this.loadApprovedRequests(); 
       },
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
   }
 
-  loadCategories() {
-    this.requestService.getCategories().subscribe(cats => {
-      this.categories = cats;
-      this.cdr.detectChanges();
-    });
-  }
 
-  // Updated: Load from public endpoint
   private loadApprovedRequests() {
-    this.requestService.getApprovedPublic().subscribe({ // NEW: Use public endpoint
+    this.requestService.getApprovedPublic().subscribe({ 
       next: (requests) => {
         this.approved = requests;
         this.updateFilters();
@@ -137,10 +122,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   get filteredApproved() {
     const query = this.searchQuery.toLowerCase();
     let filtered = this.approved.filter(item => {
-      // NEW: Must have lat/lng
       if (item.lat == null || item.lng == null) return false;
 
-      // NEW: Distance filter if location available
       if (this.userLocation) {
         const distance = this.calculateDistance(
           this.userLocation.lat,
@@ -213,12 +196,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     } else if (index > -1) {
       this.approved.splice(index, 1);
     }
-    this.updateFilters(); // Changed to updateFilters to apply search/category
+    this.updateFilters(); 
   }
 
-  // NEW: Haversine distance formula (in km)
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Earth's radius in km
+    const R = 6371; 
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
     const a =
@@ -226,7 +208,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // distance in km
+    return R * c;
   }
 
   private deg2rad(deg: number): number {

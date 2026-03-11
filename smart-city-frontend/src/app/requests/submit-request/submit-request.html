@@ -17,8 +17,50 @@
     <div>
         <label>Category:</label>
         <select [(ngModel)]="request.category" name="category">
-            <option>Shop</option>
-            <option>Service</option>
+    <option value="">All Categories</option>
+
+    <!-- Food & Drinks -->
+        <option value="Restaurant">Restaurant</option>
+        <option value="Café">Café</option>
+        <option value="Fast Food">Fast Food</option>
+        <option value="Bakery">Bakery</option>
+        <option value="Pastry Shop">Pastry Shop</option>
+
+        <!-- Retail -->
+        <option value="Grocery Store">Grocery Store</option>
+        <option value="Supermarket">Supermarket</option>
+        <option value="Clothing Store">Clothing Store</option>
+        <option value="Electronics Store">Electronics Store</option>
+        <option value="Bookstore">Bookstore</option>
+        <option value="Flower Shop">Flower Shop</option>
+
+        <!-- Services -->
+        <option value="Barber / Hair Salon">Barber / Hair Salon</option>
+        <option value="Beauty Salon">Beauty Salon</option>
+        <option value="Laundry / Dry Cleaning">Laundry / Dry Cleaning</option>
+        <option value="Repair Shop">Repair Shop</option>
+        <option value="Printing / Copy Center">Printing / Copy Center</option>
+
+        <!-- Automotive -->
+        <option value="Mechanic">Mechanic</option>
+        <option value="Car Wash">Car Wash</option>
+        <option value="Gas Station">Gas Station</option>
+        <option value="Tire Shop">Tire Shop</option>
+
+        <!-- Health -->
+        <option value="Pharmacy">Pharmacy</option>
+        <option value="Clinic">Clinic</option>
+        <option value="Dentist">Dentist</option>
+        <option value="Veterinary">Veterinary</option>
+
+        <!-- Leisure -->
+        <option value="Gym">Gym</option>
+        <option value="Cinema">Cinema</option>
+        <option value="Game Center">Game Center</option>
+
+        <!-- Public -->
+        <option value="Bank">Bank</option>
+        <option value="Post Office">Post Office</option>
         </select>
     </div>
 
@@ -26,17 +68,22 @@
         <label>Address:</label>
         <input [(ngModel)]="request.address" name="address" placeholder="Address" required>
     </div>
+    <div>
+        <label>Latitude:</label>
+        <input type="number" [(ngModel)]="request.latitude" name="latitude" step="any" min="-90" max="90" placeholder="e.g. 36.8065" required>
+    </div>
 
-    <!-- Updated: File upload section with custom styled button -->
+    <div>
+        <label>Longitude:</label>
+        <input type="number" [(ngModel)]="request.longitude" name="longitude" step="any" min="-180" max="180" placeholder="e.g. 10.1815" required>
+    </div>
     <div class="file-upload-section">
         <label>Supporting Documents (optional):</label>
-        <label class="custom-file-upload" for="file-input">  <!-- New: Custom label as button -->
+        <label class="custom-file-upload" for="file-input">  
             Choose Files or Drag Here
         </label>
         <input id="file-input" type="file" multiple (change)="onFileChange($event)" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" hidden>
-        <!-- Hidden native input -->
         <p class="upload-hint">Supported: PDF, images, Word docs. No file chosen yet.</p>
-        <!-- Updated hint text for clarity -->
 
         @if (selectedFiles.length > 0) {
         <div class="file-preview">

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RequestService } from '../request.service';
 import { Subscription } from 'rxjs';
-import { HttpHeaders } from '@angular/common/http';  // Optional, not used but kept
+import { HttpHeaders } from '@angular/common/http';  
 
 @Component({
   selector: 'app-my-requests',
@@ -29,14 +29,14 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
 
     this.requestService.getMyRequests().subscribe({
       next: (data: any[]) => {
-        console.log('✅ Received requests:', data);           // ← debug
+        console.log('✅ Received requests:', data);         
         console.log('Number of requests:', data.length);
         if (data.length > 0) {
           console.log('First request:', data[0]);
         }
 
         this.requests = data;
-        this.cdr.detectChanges();                             // ← THIS FIXES THE DISPLAY ISSUE
+        this.cdr.detectChanges();                           
       },
       error: (err: any) => {
         console.error('❌ Error fetching my requests:', err);
@@ -47,7 +47,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
     if (this.requestService.getUpdates) {
       this.updateSub = this.requestService.getUpdates().subscribe((item: any) => {
         this.handleRealTimeUpdate(item);
-        this.cdr.detectChanges();                             // ensure real-time updates also trigger view
+        this.cdr.detectChanges();                            
       });
     }
   }
@@ -76,21 +76,21 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
     }
   }
 
-  public getStatusClass(status: string): string {  // Made public explicitly
+  public getStatusClass(status: string): string {  
     if (status === 'APPROVED') return 'status-approved';
     if (status === 'REJECTED') return 'status-rejected';
     return 'status-pending';
   }
 
-  public getFileName(path: string): string {  // Public
+  public getFileName(path: string): string {  
     return path.split('/').pop() || 'Unknown file';
   }
 
-  public getDownloadUrl(requestId: string, fileIndex: number): string {  // Public
-    return `${this.requestService.getApiBaseUrl()}/${requestId}/documents/${fileIndex}`;
+  downloadDocument(requestId: string, index: number) {
+    this.requestService.downloadDocument(requestId, index);
   }
 
-  public onAdditionalFilesChange(event: Event, requestId: string) {  // Public
+  public onAdditionalFilesChange(event: Event, requestId: string) { 
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.additionalFiles[requestId] = Array.from(input.files);
@@ -100,7 +100,6 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
   public uploadAdditionalFiles(requestId: string) {
     if (this.additionalFiles[requestId] && this.additionalFiles[requestId].length > 0) {
       const formData = new FormData();
-      // Change 'additionalDocuments' to 'documents'
       this.additionalFiles[requestId].forEach(file => formData.append('documents', file));
 
       this.requestService.addDocuments(requestId, formData).subscribe({
@@ -108,7 +107,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
           const index = this.requests.findIndex(r => r.id === requestId);
           if (index > -1) this.requests[index] = updatedRequest;
           this.additionalFiles[requestId] = [];
-          this.cdr.detectChanges();                           // already good
+          this.cdr.detectChanges();                          
         },
         error: (err: any) => alert('Error uploading files')
       });
@@ -121,35 +120,35 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
         next: (updatedRequest: any) => {
           const index = this.requests.findIndex(r => r.id === requestId);
           if (index > -1) this.requests[index] = updatedRequest;
-          this.cdr.detectChanges();                           // already good
+          this.cdr.detectChanges();                           
         },
         error: (err: any) => alert('Error deleting file')
       });
     }
   }
 
-  public delete(id: string) {  // Public
+  public delete(id: string) {  
     if (confirm('Are you sure you want to delete this request?')) {
       this.requestService.deleteRequest(id).subscribe({
-        next: () => { },  // No response body, but can handle
-        error: (err: any) => alert('Error deleting request')  // Typed
+        next: () => { },  
+        error: (err: any) => alert('Error deleting request')  
       });
     }
   }
 
-  public startEdit(item: any) {  // Public
+  public startEdit(item: any) {  
     this.editingId = item.id;
     this.editForm = { ...item };
   }
 
-  public saveEdit() {  // Public
+  public saveEdit() {  
     if (this.editingId) {
       this.requestService.updateRequestOwner(this.editingId, this.editForm).subscribe({
         next: () => {
           this.editingId = null;
           this.cdr.detectChanges();
         },
-        error: (err: any) => {  // Typed
+        error: (err: any) => {  
           console.error('Update failed', err);
           alert('Failed to update request.');
         }
@@ -157,7 +156,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
     }
   }
 
-  public cancelEdit() {  // Public
+  public cancelEdit() {  
     this.editingId = null;
     this.editForm = {};
   }

@@ -3,7 +3,6 @@
     margin: 80px auto;
     padding: 40px 32px;
     background-color: #ffffff;
-    /* Solid white for readability */
     border-radius: 16px;
     box-shadow: var(--card-shadow);
     animation: var(--animation-glow);
@@ -31,7 +30,6 @@ input[type="password"] {
     border-radius: 12px;
     font-size: 1rem;
     background: #f8f9fa;
-    /* Light gray for input fields */
     transition: var(--transition);
 }
 
@@ -79,9 +77,6 @@ p a:hover {
     color: var(--primary-blue);
     text-shadow: 0 0 5px var(--neon-glow);
 }
-
-
-/* Add to existing */
 
 form>div {
     margin-top: 1rem;

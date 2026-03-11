@@ -141,56 +141,72 @@ public class RequestController {
     // ────────────────────────────────────────────────
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ServiceRequest> submitRequest(
-            @RequestPart("name") String name,
-            @RequestPart("description") String description,
-            @RequestPart("category") String category,
-            @RequestPart("address") String address,
-            @RequestPart(value = "documents", required = false) MultipartFile[] files,
-            Authentication auth) {
+public ResponseEntity<ServiceRequest> submitRequest(
+        @RequestParam("name") String name,
+        @RequestParam("description") String description,
+        @RequestParam("category") String category,
+        @RequestParam("address") String address,
+        @RequestParam("municipality") String municipality,   // you can add this too
+        @RequestParam("latitude") Double latitude,
+        @RequestParam("longitude") Double longitude,
+        @RequestParam(value = "documents", required = false) MultipartFile[] files,
+        Authentication auth) {
 
-        logger.info("New request submission from user: {}", extractUserId(auth));
+    logger.info("New request submission from user: {}", extractUserId(auth));
 
-        ServiceRequest request = new ServiceRequest();
-        request.name = name;
-        request.description = description;
-        request.category = category;
-        request.address = address;
-        request.ownerId = extractUserId(auth);
-        request.documents = new ArrayList<>();
-        User owner = (User) auth.getPrincipal();
-        request.municipality = owner.municipality;
-        ServiceRequest saved = repository.save(request);
+    ServiceRequest request = new ServiceRequest();
+    request.name = name;
+    request.description = description;
+    request.category = category;
+    request.address = address;
 
-        if (files != null && files.length > 0) {
-            Path requestDir = Paths.get("./uploads/requests/" + saved.id);
-            try {
-                Files.createDirectories(requestDir);
-                for (MultipartFile file : files) {
-                    if (file.isEmpty())
-                        continue;
+    request.lat = latitude;
+    request.lng = longitude;
 
-                    String originalName = file.getOriginalFilename();
-                    String fileName = UUID.randomUUID()
-                            + (originalName != null ? "_" + originalName.replaceAll("[^a-zA-Z0-9.-]", "_") : "");
-                    Path filePath = requestDir.resolve(fileName);
-                    file.transferTo(filePath);
+    request.ownerId = extractUserId(auth);
+    request.documents = new ArrayList<>();
 
-                    saved.documents.add(filePath.toString());
-                }
-                saved = repository.save(saved);
-            } catch (IOException e) {
-                logger.error("File upload failed: {}", e.getMessage());
-                repository.delete(saved);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    User owner = (User) auth.getPrincipal();
+    request.municipality = owner.municipality;
+
+    ServiceRequest saved = repository.save(request);
+
+    if (files != null && files.length > 0) {
+        Path requestDir = Paths.get("./uploads/requests/" + saved.id);
+        try {
+            Files.createDirectories(requestDir);
+
+            for (MultipartFile file : files) {
+                if (file.isEmpty())
+                    continue;
+
+                String originalName = file.getOriginalFilename();
+                String fileName = UUID.randomUUID()
+                        + (originalName != null
+                        ? "_" + originalName.replaceAll("[^a-zA-Z0-9.-]", "_")
+                        : "");
+
+                Path filePath = requestDir.resolve(fileName);
+                file.transferTo(filePath);
+
+                saved.documents.add(filePath.toString());
             }
-        }
 
-        messagingTemplate.convertAndSend("/topic/requests", saved);
-        logger.info("Request submitted successfully: ID {}", saved.id);
-        return ResponseEntity.ok(saved);
+            saved = repository.save(saved);
+
+        } catch (IOException e) {
+            logger.error("File upload failed: {}", e.getMessage());
+            repository.delete(saved);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
+    messagingTemplate.convertAndSend("/topic/requests", saved);
+
+    logger.info("Request submitted successfully: ID {}", saved.id);
+
+    return ResponseEntity.ok(saved);
+}
     @PutMapping("/admin/{id}")
     public ResponseEntity<ServiceRequest> updateAdmin(@PathVariable String id,
             @RequestBody Map<String, Object> payload,
@@ -393,48 +409,67 @@ public class RequestController {
     }
 
     @GetMapping("/{id}/documents/{index}")
-    public ResponseEntity<InputStreamResource> getDocument(
-            @PathVariable String id,
-            @PathVariable int index,
-            Authentication auth) {
+public ResponseEntity<InputStreamResource> getDocument(
+        @PathVariable String id,
+        @PathVariable int index,
+        Authentication auth) {
 
-        logger.info("Downloading document {} for request {}", index, id);
+    logger.info("Opening document {} for request {}", index, id);
 
-        if (auth == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String currentUserId = extractUserId(auth);
-        boolean isAdmin = isAdmin(auth);
-
-        return repository.findById(id)
-                .<ResponseEntity<InputStreamResource>>map(existing -> {
-                    if (!existing.ownerId.equals(currentUserId) && !isAdmin) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-                    }
-
-                    if (index < 0 || index >= existing.documents.size()) {
-                        return ResponseEntity.notFound().build();
-                    }
-
-                    String docPath = existing.documents.get(index);
-                    Path path = Paths.get(docPath);
-
-                    try {
-                        InputStream inputStream = Files.newInputStream(path);
-                        return ResponseEntity.ok()
-                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                .header(HttpHeaders.CONTENT_DISPOSITION,
-                                        "attachment; filename=\"" + path.getFileName() + "\"")
-                                .body(new InputStreamResource(inputStream));
-                    } catch (IOException e) {
-                        logger.error("File read failed: {}", e.getMessage());
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    }
-                })
-                .orElseGet(ResponseEntity.notFound()::build);
+    if (auth == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    String currentUserId = extractUserId(auth);
+    boolean isAdminUser = isAdmin(auth);
+
+    return repository.findById(id)
+            .<ResponseEntity<InputStreamResource>>map(existing -> {
+                if (!existing.ownerId.equals(currentUserId) && !isAdminUser) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+
+                if (index < 0 || index >= existing.documents.size()) {
+                    return ResponseEntity.notFound().build();
+                }
+
+                String docPath = existing.documents.get(index);
+                Path path = Paths.get(docPath);
+
+                try {
+                    InputStream inputStream = Files.newInputStream(path);
+                    String filename = path.getFileName().toString();
+
+                    // 🔥 NEW: Proper MIME type + INLINE for preview
+                    String contentType = getContentType(filename);
+
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType(contentType))
+                            .header(HttpHeaders.CONTENT_DISPOSITION,
+                                    "inline; filename=\"" + filename + "\"")   // ← CHANGED FROM "attachment"
+                            .body(new InputStreamResource(inputStream));
+
+                } catch (IOException e) {
+                    logger.error("File read failed: {}", e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+            })
+            .orElseGet(ResponseEntity.notFound()::build);
+}
+
+// Add this small helper at the bottom of the class (anywhere)
+private String getContentType(String filename) {
+    String ext = filename.substring(filename.lastIndexOf('.')).toLowerCase();
+    return switch (ext) {
+        case ".pdf"  -> "application/pdf";
+        case ".jpg", ".jpeg" -> "image/jpeg";
+        case ".png"  -> "image/png";
+        case ".gif"  -> "image/gif";
+        case ".txt"  -> "text/plain";
+        case ".doc", ".docx" -> "application/msword";
+        default      -> "application/octet-stream";
+    };
+}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id, Authentication auth) {
         String currentUserId = extractUserId(auth);

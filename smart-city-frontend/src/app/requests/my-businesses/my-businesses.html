@@ -11,7 +11,7 @@
             </div>
             } @else { @for (business of businesses; track business.id) {
             <div class="business-card" [class.active]="selectedBusiness?.id === business.id" (click)="selectBusiness(business)">
-                <div class="business-category">{{ business.category }}</div>
+                <div class="business-name">{{ business.name }}</div>
                 <div class="business-address">{{ business.address }}</div>
             </div>
             } }
@@ -25,7 +25,7 @@
             </div>
             } @else {
             <div class="business-header">
-                <div class="business-category-large">{{ selectedBusiness.category }}</div>
+                <div class="business-category-large">{{ selectedBusiness.name }}</div>
                 <div class="business-address-large">Address: {{ selectedBusiness.address }}</div>
                 <div class="business-description">{{ selectedBusiness.description }}</div>
             </div>

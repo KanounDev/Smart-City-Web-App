@@ -11,9 +11,7 @@
     --card-shadow: 0 4px 20px rgba(0, 119, 255, 0.12);
     --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     --nav-bg: rgba(0, 150, 136, 0.48);
-    /* ← more transparent teal */
     --nav-backdrop: blur(14px);
-    /* ← slightly stronger blur */
     --text-shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -24,9 +22,7 @@
     width: 100vw;
     height: 100vh;
     z-index: -1;
-    /* Ensures it sits behind everything */
     pointer-events: none;
-    /* Allows clicks to pass through to the form/links */
 }
 
 @keyframes subtleGlow {
@@ -41,13 +37,9 @@
 html,
 body {
     height: 100%;
-    /* New: Force full height */
     margin: 0;
-    /* New: Remove default margins */
     padding: 0;
-    /* New: Remove padding */
     overflow-x: hidden;
-    /* Prevent horizontal scroll */
 }
 
 .messaging-icon {
@@ -59,7 +51,6 @@ body {
     border-radius: 50%;
     color: var(--text-light);
     background: rgba(0, 150, 136, 0.3);
-    /* subtle teal background like nav */
     text-decoration: none;
     transition: var(--transition);
     font-size: 1.4rem;
@@ -111,14 +102,11 @@ nav {
     display: flex;
     align-items: center;
     gap: 2.2rem;
-    /* more space between items */
 }
 
 .nav-left a {
     font-size: 1.32rem;
-    /* bigger Home */
     font-weight: 700;
-    /* bold for branding */
     letter-spacing: -0.01em;
     text-shadow: var(--text-shadow-nav);
 }
@@ -130,21 +118,17 @@ nav {
 .nav-right a,
 .nav-right button {
     font-size: 1.05rem;
-    /* noticeably larger than before */
     font-weight: 500;
     padding: 0.65rem 1.4rem;
     border-radius: 10px;
     transition: var(--transition);
     text-shadow: var(--text-shadow-nav);
-    /* helps against background lines */
     position: relative;
 }
 
 .nav-right button {
-    /* Logout */
     font-weight: 600;
     background: rgba(220, 38, 38, 0.95);
-    /* stronger red */
     padding: 0.65rem 1.6rem;
 }
 
@@ -175,16 +159,12 @@ nav a[aria-current="page"] {
     box-shadow: 0 0 0 2px var(--accent-cyan);
 }
 
-
-/* Underline hover effect – modern & clean */
-
 nav a::after,
 nav button::after {
     content: '';
     position: absolute;
     width: 0;
     height: 3px;
-    /* thicker line */
     bottom: 0.4rem;
     left: 50%;
     background: var(--accent-cyan);
@@ -205,9 +185,6 @@ nav a[aria-current="page"] {
     box-shadow: 0 0 0 2.5px var(--accent-cyan);
 }
 
-
-/* Logout button – more danger-oriented but still fits theme */
-
 nav button {
     background: rgba(255, 45, 85, 0.9);
     border: none;
@@ -225,7 +202,6 @@ main {
     max-width: 1400px;
     margin: 0 auto;
     min-height: calc(100vh - 60px);
-    /* New: Ensure content fills height minus nav (adjust 60px to your nav height) */
 }
 
 @media (max-width: 768px) {
@@ -249,12 +225,6 @@ main {
     }
 }
 
-
-/* Existing styles remain unchanged */
-
-
-/* New: Notification styles */
-
 .notification-wrapper {
     position: relative;
     display: inline-block;
@@ -269,7 +239,6 @@ main {
     border-radius: 50%;
     color: var(--text-light);
     background: rgba(0, 150, 136, 0.3);
-    /* Matches messaging */
     text-decoration: none;
     cursor: pointer;
     transition: var(--transition);

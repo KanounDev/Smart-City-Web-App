@@ -57,7 +57,7 @@ export class OwnerCommunicationsComponent implements OnInit, OnDestroy, AfterVie
       next: (conv) => {
         this.messages = conv.messages || [];
         this.cdr.detectChanges();
-        setTimeout(() => this.scrollToBottom(), 100); // small delay for DOM render
+        setTimeout(() => this.scrollToBottom(), 100);
       },
       error: (err) => console.error('Failed to load messages', err)
     });

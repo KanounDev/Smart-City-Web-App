@@ -1,11 +1,9 @@
 h2 {
     text-align: center;
     margin-bottom: 25px;
-    /* Aligned with submit-request */
     color: var(--primary-blue);
     font-size: 2rem;
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
-    /* Added subtle shadow */
 }
 
 .no-requests {
@@ -18,28 +16,18 @@ h2 {
 .requests-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    /* Reduced min-width for narrower cards */
     gap: 20px;
-    /* Reduced gap for compactness */
     max-width: 1000px;
-    /* Reduced overall max-width to center and constrain */
     margin: 0 auto;
 }
 
-
-/* Simplified card styling: Removed gradient, lighter shadow */
-
 .request-card {
     background: #ffffff;
-    /* Solid white, like form */
     padding: 20px;
-    /* Slightly reduced padding */
     border-radius: 12px;
-    /* Aligned with form */
     box-shadow: var(--card-shadow);
     transition: var(--transition);
     border: 1px solid rgba(0, 123, 255, 0.1);
-    /* Subtle border */
 }
 
 .request-card:hover {
@@ -234,11 +222,7 @@ h2 {
 
 .remove-btn:hover {
     background: #ef4444;
-    /* Lighter red */
 }
-
-
-/* Action buttons: Aligned with submit form */
 
 .action-buttons {
     display: flex;
@@ -248,7 +232,6 @@ h2 {
 
 .action-buttons button {
     flex: 1;
-    /* Equal width */
     padding: 10px;
     border: none;
     border-radius: 10px;
@@ -296,22 +279,13 @@ h2 {
     background: #d1d5db;
 }
 
-
-/* Center the entire filter row horizontally */
-
 .filters-row {
     display: flex;
     justify-content: center;
-    /* ← centers the content horizontally */
     margin: 1.5rem auto 2rem auto;
-    /* good spacing before list */
     padding: 0 1rem;
     max-width: 1000px;
-    /* same as your requests-list max-width */
 }
-
-
-/* Container for label + select — centered content */
 
 .status-filter {
     display: flex;
@@ -325,9 +299,6 @@ h2 {
     box-shadow: var(--card-shadow);
 }
 
-
-/* Center label and select inside the pill */
-
 .status-filter label {
     font-weight: 600;
     color: var(--text-dark);
@@ -335,13 +306,9 @@ h2 {
     text-align: center;
 }
 
-
-/* Dropdown styling - make it look intentional & centered */
-
 .status-filter select {
     padding: 10px 14px;
     min-width: 220px;
-    /* wider so it's comfortable */
     border: 1px solid rgba(0, 123, 255, 0.25);
     border-radius: 10px;
     background: white;
@@ -351,15 +318,11 @@ h2 {
     cursor: pointer;
     transition: all 0.2s ease;
     appearance: none;
-    /* remove default arrow */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 12px;
 }
-
-
-/* Hover & focus states matching your theme */
 
 .status-filter select:hover {
     border-color: var(--accent-cyan);

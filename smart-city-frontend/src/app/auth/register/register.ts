@@ -2,21 +2,22 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
+
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterModule],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
 export class RegisterComponent {
-  user = { username: '', password: '', role: 'CITIZEN', municipality: '' };  // NEW: Add municipality, default role CITIZEN
+  user = { username: '', password: '', role: 'CITIZEN', municipality: '' };  
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  // register.ts
 register() {
   this.authService.register(this.user).subscribe({
     next: (response: any) => {
@@ -28,10 +29,10 @@ register() {
       let errorMsg = 'Registration failed. Please try again.';
       
       if (err.status === 400 && err.error?.error) {
-        errorMsg = err.error.error; // e.g. "Municipality is required for owners and admins"
+        errorMsg = err.error.error; 
       }
       
-      alert(errorMsg); // or show a nicer toast/notification
+      alert(errorMsg); 
     }
   });
 }

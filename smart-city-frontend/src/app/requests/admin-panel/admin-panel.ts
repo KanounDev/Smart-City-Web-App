@@ -33,7 +33,6 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadAllRequests();
-    this.loadCategories();
 
     if (this.requestService.getUpdates) {
       this.updateSub = this.requestService.getUpdates().subscribe((updatedItem: any) => {
@@ -83,79 +82,14 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadCategories() {
-    this.requestService.getCategories().subscribe({
-      next: (data) => {
-        this.categories = data || [];
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error loading categories', err);
-        alert('Failed to load categories.');
-      }
-    });
-  }
+  
 
   setTab(tab: string) {
     this.activeTab = tab;
   }
 
-  // Category CRUD
-  addCategory() {
-    if (this.newCategory) {
-      this.requestService.addCategory({ name: this.newCategory }).subscribe({
-        next: (cat) => {
-          this.categories.push(cat);
-          this.newCategory = '';
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Add category failed', err);
-          alert('Failed to add category.');
-        }
-      });
-    }
-  }
-
-  editCategory(id: string, name: string) {
-    this.editingCategoryId = id;
-    this.editCategoryValue = name;
-  }
-
-  saveCategory() {
-    if (this.editingCategoryId) {
-      this.requestService.updateCategory(this.editingCategoryId, { name: this.editCategoryValue }).subscribe({
-        next: () => {
-          const cat = this.categories.find(c => c.id === this.editingCategoryId);
-          if (cat) {
-            cat.name = this.editCategoryValue;
-          }
-          this.editingCategoryId = null;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Update category failed', err);
-          alert('Failed to update category.');
-        }
-      });
-    }
-  }
-
   cancelEdit() {
     this.editingCategoryId = null;
-  }
-
-  deleteCategory(id: string) {
-    this.requestService.deleteCategory(id).subscribe({
-      next: () => {
-        this.categories = this.categories.filter(c => c.id !== id);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Delete category failed', err);
-        alert('Failed to delete category.');
-      }
-    });
   }
 
   ngOnDestroy() {
@@ -215,11 +149,14 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
   getDownloadUrl(requestId: string, index: number): string {
     return `${this.requestService.getApiBaseUrl()}/${requestId}/documents/${index}`;
   }
-
+  downloadDocument(requestId: string, index: number) {
+    this.requestService.downloadDocument(requestId, index);
+  }
   getFileName(docPath: string): string {
     return docPath.split('/').pop() || 'Document';
   }
 
+  
   // Add this method (same as in MyRequestsComponent)
   public getStatusClass(status: string): string {
     switch (status?.toUpperCase()) {

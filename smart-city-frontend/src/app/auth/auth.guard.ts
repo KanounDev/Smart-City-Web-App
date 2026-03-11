@@ -13,19 +13,16 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   const requiredRole = route.data['role'] as string | undefined;
 
-  // If no role requirement → allow anyone logged in
   if (!requiredRole) {
     return true;
   }
 
   const userRole = authService.getRole();
 
-  // Compare without "ROLE_" prefix
   if (userRole === requiredRole) {
     return true;
   }
 
-  // Wrong role → redirect to home
   router.navigate(['/']);
   return false;
 };
