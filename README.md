@@ -1,4 +1,3 @@
-```markdown
 # Smart City Platform 🏙️
 
 A modern web application for digital management and visualization of urban services, enabling citizens to discover new shops and services while streamlining administrative procedures for business owners and municipal authorities.
@@ -177,4 +176,3 @@ ng serve
 4. **Access the application:**
    - Frontend: `http://localhost:4200`
    - Backend API: `http://localhost:8081`
-```
