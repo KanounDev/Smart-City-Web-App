@@ -11,10 +11,6 @@ A modern web application for digital management and visualization of urban servi
   - [Backend Setup (Spring Boot)](#backend-setup-spring-boot)
   - [Frontend Setup (Angular)](#frontend-setup-angular)
 - [Running the Application](#running-the-application)
-- [API Documentation](#api-documentation)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## 🎯 About the Project
 
