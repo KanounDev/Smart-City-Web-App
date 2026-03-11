@@ -182,7 +182,7 @@ cd smart-city-frontend
 
 2. **Install dependencies:**
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
 3. **Run the frontend:**
@@ -190,6 +190,26 @@ npm install
 ng serve
 ```
    The frontend will be available at `http://localhost:4200`
+
+### Troubleshooting Frontend Installation
+
+If you encounter any issues during `npm install --legacy-peer-deps`, try these steps:
+
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Delete node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+# On Windows PowerShell:
+# Remove-Item -Recurse -Force node_modules, package-lock.json
+
+# Retry installation
+npm install --legacy-peer-deps
+```
+
+> **Note:** The `node_modules` folder and `package-lock.json` are not included in the repository. They will be generated locally when you run `npm install --legacy-peer-deps`.
+```
 
 ## 🏃 Running the Application
 
