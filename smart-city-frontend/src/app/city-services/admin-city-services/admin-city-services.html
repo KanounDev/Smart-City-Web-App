@@ -1,0 +1,74 @@
+<div class="admin-city-services">
+  <h1>Manage City Services</h1>
+  <p class="subtitle">Add or update service points for the public map.</p>
+
+  <div class="form-card">
+    <h3>{{ form.id ? 'Edit Service' : 'Add Service' }}</h3>
+    <div class="form-grid">
+      <label>
+        Name
+        <input type="text" [(ngModel)]="form.name" />
+      </label>
+
+      <label>
+        Type
+        <select [(ngModel)]="form.type">
+          <option value="HEALTH">Health</option>
+          <option value="TRANSPORT">Transport</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </label>
+
+      <label>
+        Description
+        <textarea rows="2" [(ngModel)]="form.description"></textarea>
+      </label>
+
+      <label>
+        Address
+        <input type="text" [(ngModel)]="form.address" />
+      </label>
+
+      <label>
+        Latitude
+        <input type="number" [(ngModel)]="form.lat" />
+      </label>
+
+      <label>
+        Longitude
+        <input type="number" [(ngModel)]="form.lng" />
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="ghost" (click)="useCurrentLocation()">Use current location</button>
+      <div class="right-actions">
+        <button type="button" class="ghost" (click)="resetForm()">Clear</button>
+        <button type="button" class="primary" (click)="save()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="list">
+    @if (loading) {
+      <p>Loading...</p>
+    } @else if (services.length === 0) {
+      <p class="empty">No services yet.</p>
+    } @else {
+      @for (service of services; track service.id) {
+        <div class="service-item">
+          <div>
+            <strong>{{ service.name }}</strong>
+            <span class="type">{{ service.type }}</span>
+            <p class="meta">{{ service.address }}</p>
+            <p class="meta">Lat: {{ service.lat }}, Lng: {{ service.lng }}</p>
+          </div>
+          <div class="actions">
+            <button class="ghost" (click)="edit(service)">Edit</button>
+            <button class="danger" (click)="delete(service)">Delete</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

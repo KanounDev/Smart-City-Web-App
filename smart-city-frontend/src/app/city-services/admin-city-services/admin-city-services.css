@@ -1,0 +1,119 @@
+.admin-city-services {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.subtitle {
+  color: #4a5568;
+  margin-bottom: 20px;
+}
+
+.form-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+input, select, textarea {
+  padding: 8px 10px;
+  border: 1px solid #d0d7e2;
+  border-radius: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 10px;
+}
+
+.right-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary {
+  background: #1e88e5;
+  color: white;
+}
+
+.ghost {
+  background: #f2f4f7;
+}
+
+.danger {
+  background: #c62828;
+  color: white;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.service-item .type {
+  margin-left: 8px;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.service-item .meta {
+  margin: 4px 0 0;
+  color: #4a5568;
+  font-size: 13px;
+}
+
+.empty {
+  background: #fff3cd;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .service-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

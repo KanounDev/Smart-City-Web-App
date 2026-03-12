@@ -1,0 +1,43 @@
+<div class="city-services">
+  <header>
+    <h1>City Services Map</h1>
+    <p>Find health, transport, and admin services near you.</p>
+  </header>
+
+  <div class="filters">
+    <input type="text" [(ngModel)]="searchQuery" (input)="updateMap()" placeholder="Search services..." />
+    <select [(ngModel)]="selectedType" (change)="updateMap()">
+      <option value="">All types</option>
+      <option value="HEALTH">Health</option>
+      <option value="TRANSPORT">Transport</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+    <button type="button" class="refresh-btn" (click)="loadServices()">Refresh</button>
+  </div>
+
+  <div class="layout">
+    <div class="list">
+      @if (filteredServices.length === 0) {
+        <p class="empty"><br/>
+          No services match your search.</p>
+      } @else {
+        @for (service of filteredServices; track service.id) {
+          <div class="service-card">
+            <h3>{{ service.name }}</h3>
+            <span class="type">{{ service.type }}</span>
+            <p class="desc">{{ service.description }}</p>
+            @if (service.address) {
+              <p class="meta">{{ service.address }}</p>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <div class="map-column">
+      <div class="map-container" leaflet [leafletOptions]="options" [leafletLayers]="layers"
+        (leafletMapReady)="onMapReady($event)">
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+.report-issue {
+  max-width: 820px;
+  margin: 40px auto;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.report-issue h1 {
+  margin-bottom: 6px;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin-bottom: 20px;
+  color: #4a5568;
+}
+
+.issue-form {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+input, select, textarea {
+  padding: 10px 12px;
+  border: 1px solid #d0d7e2;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.location-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f5f7fb;
+  border: 1px solid #e2e8f0;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.location-info {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.location-info .error {
+  color: #c53030;
+}
+
+.file-label input {
+  margin-top: 6px;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.file-list button {
+  background: transparent;
+  border: none;
+  color: #c53030;
+  cursor: pointer;
+}
+
+.submit-btn {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #1565c0;
+}

@@ -17,10 +17,14 @@ import { Subscription } from 'rxjs';
    <nav>
      <div class="nav-left">
       <a routerLink="/">Home</a>
+      <a routerLink="/city-services">City Services</a>
     </div>
 
     <div class="nav-right">
       @if (authService.isLoggedIn()) {
+        @if (authService.getRole() === 'CITIZEN') {
+          <a routerLink="/report-issue">Report Issue</a>
+        }
         @if (authService.getRole() === 'OWNER') {
           <a routerLink="/submit">Submit Request</a>
           <a routerLink="/my-requests">My Requests</a>
@@ -31,6 +35,8 @@ import { Subscription } from 'rxjs';
         }
         @if (authService.getRole() === 'ADMIN') {
           <a routerLink="/admin">Admin Panel</a>
+          <a routerLink="/admin/issues">Issue Moderation</a>
+          <a routerLink="/admin/city-services">Manage Services</a>
           <a routerLink="/communications" class="messaging-icon" title="Messages">
             <span class="material-icons">message</span>
           </a>
@@ -160,19 +166,20 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.loadNotifications();
     }
-
-    // 2. Get current user → store ID + subscribe to personal WS
-    this.requestService.getCurrentUser().subscribe({
-      next: (user) => {
-        if (user?.id) {
-          this.currentUserId = user.id;
-          this.requestService.setCurrentUser(user.id);
-          console.log('✅ Current user ID cached:', this.currentUserId);
-          this.loadNotifications();           // ← extra safety load
-        }
-      },
-      error: (err) => console.warn('Could not get current user', err)
-    });
+    // 2. Get current user -> store ID + subscribe to personal WS
+    if (this.authService.isLoggedIn()) {
+      this.requestService.getCurrentUser().subscribe({
+        next: (user) => {
+          if (user?.id) {
+            this.currentUserId = user.id;
+            this.requestService.setCurrentUser(user.id);
+            console.log('Current user ID cached:', this.currentUserId);
+            this.loadNotifications(); // extra safety load
+          }
+        },
+        error: (err) => console.warn('Could not get current user', err)
+      });
+    }
 
     // 3. Real-time notifications (updated)
     this.notifSub = this.requestService.getNotificationUpdates().subscribe((newNotif: any) => {
@@ -327,3 +334,4 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 }
+

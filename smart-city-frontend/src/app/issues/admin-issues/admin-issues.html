@@ -1,0 +1,48 @@
+<div class="admin-issues">
+  <h1>Issue Moderation</h1>
+  <p class="subtitle">Approve or reject citizen reports.</p>
+  <div class="toolbar">
+    <button type="button" (click)="loadPending()">Refresh</button>
+  </div>
+
+  @if (loading) {
+    <p>Loading...</p>
+  } @else if (pendingIssues.length === 0) {
+    <p class="empty">No pending issues.</p>
+  } @else {
+    <div class="issues-list">
+      @for (issue of pendingIssues; track issue.id) {
+        <div class="issue-card">
+          <div class="issue-header">
+            <h3>{{ issue.title }}</h3>
+            <span class="badge">{{ issue.category }}</span>
+          </div>
+
+          <p class="desc">{{ issue.description }}</p>
+          @if (issue.address) {
+            <p class="meta"><strong>Address:</strong> {{ issue.address }}</p>
+          }
+          <p class="meta"><strong>Location:</strong> {{ issue.lat }}, {{ issue.lng }}</p>
+
+          @if (issue.photos?.length > 0) {
+            <div class="photos">
+              @for (photo of issue.photos; track $index) {
+                <button type="button" (click)="openPhoto(issue.id, $index)">Photo {{ $index + 1 }}</button>
+              }
+            </div>
+          }
+
+          <label>
+            Admin comment
+            <textarea [(ngModel)]="issue._comment" rows="2"></textarea>
+          </label>
+
+          <div class="actions">
+            <button class="approve" (click)="approve(issue)">Approve</button>
+            <button class="reject" (click)="reject(issue)">Reject</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
