@@ -42,6 +42,18 @@ The Smart City Platform addresses the need for a centralized digital solution to
 - Approve or reject applications digitally
 - Manually position approved services on the city map (ensuring accuracy)
 
+## ✨ Optional Added Features
+
+### For Citizens & Property Owners 🏠
+- **Issue Reporting System** – Report town issues such as broken roads, non-functional street lighting, garbage accumulation, or other public inconveniences directly through the platform
+- **Track Report Status** – Monitor the progress of reported issues and receive updates on resolution status
+- **Community Notifications** – Get notified when issues in your area are acknowledged or resolved
+
+### For Municipal Authorities 🏛️
+- **Issue Management Dashboard** – View, filter, and manage all citizen-reported issues in one centralized interface
+- **Accept/Reject Issue Resolution** – Review reported problems and decide whether to approve them for fixing or reject them with proper justification
+- **Comment Functionality** – Add comments or notes to each report to communicate reasoning, provide updates, or request further clarification from citizens
+
 ## 🛠️ Tech Stack
 
 ### Backend
