@@ -1,0 +1,47 @@
+<div class="my-issues">
+    <h1>My Issues Status</h1>
+    <p class="subtitle">Track the progress of every report you submitted.</p>
+
+    <div class="tabs">
+        <button [class.active]="currentFilter === 'ALL'" (click)="filterIssues('ALL')">All</button>
+        <button [class.active]="currentFilter === 'PENDING'" (click)="filterIssues('PENDING')">Pending</button>
+        <button [class.active]="currentFilter === 'APPROVED'" (click)="filterIssues('APPROVED')">Approved</button>
+        <button [class.active]="currentFilter === 'REJECTED'" (click)="filterIssues('REJECTED')">Rejected</button>
+    </div>
+
+    @if (loading) {
+    <p>Loading...</p>
+    } @else if (filteredIssues.length === 0) {
+    <p class="empty">No issues yet. <a routerLink="/report-issue">Report your first one!</a></p>
+    } @else {
+    <div class="issues-grid">
+        @for (issue of filteredIssues; track issue.id) {
+        <div class="issue-card">
+            <div class="issue-header">
+                <h3>{{ issue.title }}</h3>
+                <span class="badge" [class.pending]="issue.status==='PENDING'" [class.approved]="issue.status==='APPROVED'" [class.rejected]="issue.status==='REJECTED'">
+              {{ issue.status }}
+            </span>
+            </div>
+
+            <p class="desc">{{ issue.description }}</p>
+            @if (issue.municipality) {
+            <p class="meta"><strong>Municipality:</strong> {{ issue.municipality }}</p>
+            }
+            <p class="meta"><strong>Location:</strong> {{ issue.lat }}, {{ issue.lng }}</p>
+
+            @if (issue.photos?.length > 0) {
+            <div class="photos">
+                @for (photo of issue.photos; track $index) {
+                <button type="button" (click)="openPhoto(issue.id, $index)">Photo {{ $index + 1 }}</button> }
+            </div>
+            } @if (issue.comments) {
+            <div class="admin-comment">
+                <strong>Admin comment:</strong> {{ issue.comments }}
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>

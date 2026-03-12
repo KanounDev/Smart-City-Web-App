@@ -48,6 +48,8 @@ public class Notification {
         NEW_MESSAGE, // New chat message
         DOCUMENT_REQUESTED, // Admin asks for more docs
         NEW_BUSINESS_APPROVED, // For citizens: New shop/service in your area (broadcast)
-        REVIEW_ADDED // Optional: Someone reviewed your business
+        REVIEW_ADDED,
+        ISSUE_CREATED,
+        ISSUE_STATUS_CHANGED
     }
 }

@@ -1,8 +1,13 @@
 package com.example.smartcity.service;
 
+import com.example.smartcity.model.Issue;
 import com.example.smartcity.model.Notification;
 import com.example.smartcity.model.ServiceRequest;
 import com.example.smartcity.repository.NotificationRepository;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -91,5 +96,43 @@ public class NotificationService {
 
         // 🔥 Exact same real-time push as the original sample project
         messagingTemplate.convertAndSend("/topic/notifications/" + ownerId, notif);
+    }
+    public void createIssueStatusChangedNotification(Issue issue) {
+        if (issue.reporterId == null) return;
+
+        Notification notif = new Notification();
+        notif.userId = issue.reporterId;
+        notif.type = Notification.NotificationType.ISSUE_STATUS_CHANGED;
+        notif.title = "Issue Status Updated";
+        notif.message = "Your issue '" + issue.title + "' has been " + issue.status.toLowerCase() + ".";
+        if (issue.comments != null && !issue.comments.isEmpty()) {
+            notif.message += " Admin comment: " + issue.comments;
+        }
+        notif.relatedId = issue.id;
+        notif.relatedType = "Issue";
+        notif.createdAt = LocalDateTime.now();
+        notif.readBy = new HashSet<>();
+
+        notificationRepository.save(notif);
+        messagingTemplate.convertAndSend("/topic/notifications/" + issue.reporterId, notif);
+    }
+
+    // NEW: Notification for admin when a new issue is created (list will update instantly)
+    public void createNewIssueNotification(Issue issue) {
+        if (issue.municipality == null) return;
+
+        Notification notif = new Notification();
+        notif.userId = null;   // broadcast style
+        notif.type = Notification.NotificationType.ISSUE_CREATED;
+        notif.title = "New Issue Reported";
+        notif.message = "New " + issue.category + " issue reported in " + issue.municipality;
+        notif.relatedId = issue.id;
+        notif.relatedType = "Issue";
+        notif.municipality = issue.municipality;
+        notif.createdAt = LocalDateTime.now();
+        notif.readBy = new HashSet<>();
+
+        notificationRepository.save(notif);
+        messagingTemplate.convertAndSend("/topic/new-issues", notif);
     }
 }

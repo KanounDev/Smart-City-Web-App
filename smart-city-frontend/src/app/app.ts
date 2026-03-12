@@ -21,16 +21,22 @@ import { Subscription } from 'rxjs';
 
     <div class="nav-right">
       @if (authService.isLoggedIn()) {
+        @if (authService.getRole() === 'CITIZEN' || authService.getRole() === 'OWNER') {
+          <a routerLink="/report-issue">Report Issue</a>
+          <a routerLink="/my-issues">Issues Status</a>
+         }
         @if (authService.getRole() === 'OWNER') {
           <a routerLink="/submit">Submit Request</a>
           <a routerLink="/my-requests">My Requests</a>
           <a routerLink="/my-businesses">My Businesses</a>
+          <a routerLink="/report-issue">Report Issue</a>
           <a routerLink="/messages" class="messaging-icon" title="Messages">
             <span class="material-icons">message</span>
           </a>
         }
         @if (authService.getRole() === 'ADMIN') {
           <a routerLink="/admin">Admin Panel</a>
+          <a routerLink="/admin/issues">Issue Moderation</a>
           <a routerLink="/communications" class="messaging-icon" title="Messages">
             <span class="material-icons">message</span>
           </a>
@@ -69,6 +75,8 @@ import { Subscription } from 'rxjs';
                   @case ('NEW_BUSINESS_APPROVED') { <span class="material-icons">store</span> }
                   @case ('NEW_MESSAGE') { <span class="material-icons">mail</span> }
                   @case ('REVIEW_ADDED') { <span class="material-icons">star</span> }
+                  @case ('ISSUE_CREATED') { <span class="material-icons">report</span> }
+                  @case ('ISSUE_STATUS_CHANGED') { <span class="material-icons">update</span> }
                   @default { <span class="material-icons">info</span> }
                 }
               </div>
@@ -101,12 +109,11 @@ import { Subscription } from 'rxjs';
   `,
   styleUrls: ['./app.css']
 })
-// 2. Implement AfterViewInit
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  // 3. Get reference to the background div
   @ViewChild('vantaBg') vantaBg!: ElementRef;
   @ViewChild('notificationsDropdown') notificationsDropdown!: ElementRef;
+
   constructor(public authService: AuthService, private router: Router, private requestService: RequestService, private cdr: ChangeDetectorRef) { }
 
   private vantaEffect: any;
@@ -123,10 +130,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   unreadCount = 0;
   showDropdown = false;
+
   toggleNotifications() {
     this.showNotifications = !this.showNotifications;
 
-    // IMPORTANT: Reload every time user opens the bell
     if (this.showNotifications) {
       this.loadNotifications();
     }
@@ -139,12 +146,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       this.showNotifications = false;
     }
   }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
   }
+
   ngOnInit() {
-    // 1. Geolocation
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => {
@@ -162,20 +170,18 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loadNotifications();
     }
 
-    // 2. Get current user → store ID + subscribe to personal WS
     this.requestService.getCurrentUser().subscribe({
       next: (user) => {
         if (user?.id) {
           this.currentUserId = user.id;
           this.requestService.setCurrentUser(user.id);
           console.log('✅ Current user ID cached:', this.currentUserId);
-          this.loadNotifications();           // ← extra safety load
+          this.loadNotifications();
         }
       },
       error: (err) => console.warn('Could not get current user', err)
     });
 
-    // 3. Real-time notifications (updated)
     this.notifSub = this.requestService.getNotificationUpdates().subscribe((newNotif: any) => {
       console.log('Real-time notif received:', newNotif);
 
@@ -205,10 +211,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
-  // 4. Initialize Vanta on the specific element
+
   ngAfterViewInit() {
     this.vantaEffect = NET.default({
-      el: this.vantaBg.nativeElement, // Target the fixed div
+      el: this.vantaBg.nativeElement,
       THREE: THREE,
       mouseControls: true,
       touchControls: true,
@@ -225,8 +231,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       showDots: true
     });
   }
+
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
     const a =
@@ -234,12 +241,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // distance in km
+    return R * c;
   }
 
   private deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
+
   private loadNotifications() {
     if (!this.currentUserId) {
       console.warn('Cannot load notifications yet - waiting for user ID...');
@@ -265,33 +273,44 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private filterRelevantNotifications(notifs: any[]): any[] {
-    return notifs.filter(notif => {
-      // Always show personal notifications (for owners/admins)
-      if (notif.userId) {
-        return true;
+ private filterRelevantNotifications(notifs: any[]): any[] {
+  return notifs.filter(notif => {
+
+    // Personal notifications
+    if (notif.userId) {
+      return true;
+    }
+
+    // Business approved notifications (with distance filter)
+    if (notif.type === 'NEW_BUSINESS_APPROVED') {
+      if (this.userLat === null || this.userLng === null || !notif.lat || !notif.lng) {
+        return false;
       }
 
-      // For broadcast (NEW_BUSINESS_APPROVED) → distance check
-      if (notif.type === 'NEW_BUSINESS_APPROVED') {
-        if (this.userLat === null || this.userLng === null || !notif.lat || !notif.lng) {
-          return false; // hide if no location
-        }
-        const distance = this.calculateDistance(
-          this.userLat, this.userLng,
-          notif.lat, notif.lng
-        );
-        return distance < 10; // < 10 km
-      }
+      const distance = this.calculateDistance(
+        this.userLat,
+        this.userLng,
+        notif.lat,
+        notif.lng
+      );
 
-      return false;
-    });
-  }
+      return distance < 10;
+    }
+
+    // Issue created notifications (broadcast)
+    if (notif.type === 'ISSUE_CREATED') {
+      return true;
+    }
+
+    return false;
+  });
+}
 
   private updateUnreadCount() {
     this.unreadCount = this.notifications.filter(n => !n.isRead).length;
     console.log('Unread count updated to:', this.unreadCount);
   }
+
   markAsRead(notifId: string) {
     if (!this.currentUserId) return;
 
@@ -326,6 +345,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       error: err => console.error('Mark all failed', err)
     });
   }
+
   ngOnDestroy() {
     if (this.vantaEffect) {
       this.vantaEffect.destroy();

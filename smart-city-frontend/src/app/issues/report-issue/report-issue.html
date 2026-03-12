@@ -1,0 +1,60 @@
+<div class="report-issue">
+    <h1>Report an Issue</h1>
+    <p class="subtitle">Broken lighting, damaged Roads, trash, illegal parking...<br/> Help the city respond faster.
+    </p>
+
+    <form class="issue-form" (ngSubmit)="submit()">
+        <label>
+      Title
+      <input type="text" [(ngModel)]="issue.title" name="title" placeholder="Short summary" required />
+    </label>
+
+        <label>
+      Category
+      <select [(ngModel)]="issue.category" name="category">
+        <option value="POTHOLE">Damaged Road</option>
+        <option value="LIGHTING">Lighting</option>
+        <option value="TRASH">Trash</option>
+        <option value="OTHER">Other</option>
+
+      </select>
+    </label>
+
+        <label>
+      Description
+      <textarea [(ngModel)]="issue.description" name="description" rows="4"
+        placeholder="Describe the issue in detail" required></textarea>
+    </label>
+
+        <label>
+      Municipality
+      <input type="text" [(ngModel)]="issue.municipality" name="municipality" placeholder="City or district" required />
+    </label>
+
+        <div class="location-box">
+            <div class="location-info">
+                <strong>GPS Location</strong> @if (isLocating) {
+                <span>Getting your location...</span> } @else if (lat && lng) {
+                <span>Lat: {{ lat }}, Lng: {{ lng }}</span> } @else {
+                <span class="error">{{ locationError || 'Location not set' }}</span> }
+            </div>
+            <button type="button" (click)="getLocation()">Refresh location</button>
+        </div>
+
+        <label class="file-label">
+      Add photo(s)
+      <input type="file" (change)="onFileChange($event)" accept="image/*" multiple />
+    </label> @if (selectedPhotos.length > 0) {
+        <ul class="file-list">
+            @for (file of selectedPhotos; track $index) {
+            <li>
+                <span>{{ file.name }}</span>
+                <button type="button" (click)="removeFile($index)">Remove</button>
+            </li>
+            }
+        </ul>
+        }
+
+        <button class="submit-btn" type="submit">Submit Report</button>
+    </form>
+</div>

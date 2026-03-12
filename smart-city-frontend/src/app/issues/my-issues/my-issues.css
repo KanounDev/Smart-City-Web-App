@@ -1,0 +1,75 @@
+.my-issues {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 16px;
+}
+
+.subtitle {
+    color: #4a5568;
+    margin-bottom: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 999px;
+    background: #e3f2fd;
+    color: #1565c0;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    background: #0066cc;
+    color: white;
+}
+
+.issues-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.issue-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.admin-comment {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-left: 4px solid #0066cc;
+    font-style: italic;
+}

@@ -1,0 +1,166 @@
+.admin-issues {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 16px;
+}
+
+.subtitle {
+    color: #4a5568;
+    margin-bottom: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 999px;
+    background: #e3f2fd;
+    color: #1565c0;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    background: #0066cc;
+    color: white;
+}
+
+.empty {
+    background: #fff3cd;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.issues-list {
+    display: grid;
+    gap: 16px;
+}
+
+.issue-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.issue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.category {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.status {
+    display: inline-block;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.desc {
+    margin: 10px 0;
+}
+
+.meta {
+    color: #4a5568;
+    font-size: 14px;
+}
+
+label {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+textarea {
+    border: 1px solid #d0d7e2;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.actions button {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.approve {
+    background: #2e7d32;
+    color: white;
+}
+
+.reject {
+    background: #c62828;
+    color: white;
+}
+
+.photos {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.photos button {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+
+/* Read-only comment for approved/rejected */
+
+.admin-comment {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-left: 4px solid #0066cc;
+    font-style: italic;
+    color: #4a5568;
+}

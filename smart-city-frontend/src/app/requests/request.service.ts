@@ -17,6 +17,7 @@ export class RequestService {
   private userNotificationSub: StompSubscription | undefined = undefined;
   public isConnected$ = this.connectedSubject.asObservable();
   private notificationUpdates = new Subject<any>();
+  notificationSubject: any;
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -287,6 +288,17 @@ export class RequestService {
             });
           }
         });
+        // Add this (right next to your new-business subscription)
+this.stompClient?.subscribe('/topic/new-issues', (message: any) => {
+    try {
+        const notif = JSON.parse(message.body);
+        this.notificationSubject.next(notif);   // or this.notificationUpdates.next(notif);
+        // Use whatever Subject/BehaviorSubject you already use for real-time notifications
+    } catch (e) {
+        console.error('Failed to parse new-issue notification', e);
+    }
+});
+        
       });
     };
 

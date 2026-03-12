@@ -1,6 +1,7 @@
 package com.example.smartcity.controller;
 
 import com.example.smartcity.model.Notification;
+import com.example.smartcity.model.User;
 import com.example.smartcity.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,14 +24,29 @@ public class NotificationController {
 
     @GetMapping("/my")
     public List<Notification> getMyNotifications(Authentication auth) {
-        String userId = ((com.example.smartcity.model.User) auth.getPrincipal()).id;
+        User user = (User) auth.getPrincipal();
+        String userId = user.id;
 
         List<Notification> personal = repository.findByUserId(userId);
+
+        // Business approvals (existing)
         List<Notification> broadcast = repository.findByUserIdIsNullAndType(
                 Notification.NotificationType.NEW_BUSINESS_APPROVED);
 
-        return Stream.concat(personal.stream(), broadcast.stream())
-                .collect(Collectors.toList());
+        List<Notification> result = new ArrayList<>(personal);
+        result.addAll(broadcast);
+
+        // 🔥 NEW: Show new issue notifications to ADMIN
+        if ("ADMIN".equals(user.role.name())) {
+            List<Notification> newIssues = repository.findByUserIdIsNullAndType(
+                    Notification.NotificationType.ISSUE_CREATED);
+            result.addAll(newIssues);
+        }
+
+        // Sort newest first
+        result.sort((a, b) -> b.createdAt.compareTo(a.createdAt));
+
+        return result;
     }
 
     /**
